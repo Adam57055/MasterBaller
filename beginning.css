@@ -154,4 +154,8 @@
     font-size: 17px;
     transform: scale(1.05);
   }
+
+  .button:active{
+    transform: scale(0.97);
+  }
   
