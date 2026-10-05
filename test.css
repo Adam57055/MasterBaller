@@ -202,3 +202,12 @@ p{
     transition: 0.2s ease-in-out;
     text-decoration: none;
 }
+
+.submit:hover{
+    transform: scale(1.05);
+    background-color: lightgreen;
+}
+
+.submit:active{
+    transform: scale(0.98);
+}
