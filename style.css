@@ -117,3 +117,14 @@
 .beginning:active{
     transform: scale(0.97);
 }
+
+.submit{
+    background-color: lightsalmon;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+    text-decoration: none;
+}
