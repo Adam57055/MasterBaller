@@ -164,3 +164,12 @@ body{
     transition: 0.2s ease-in-out;
     text-decoration: none;
 }
+
+.submit:hover{
+    transform: scale(1.03);
+    background-color: lightgreen;
+}
+
+.submit:active{
+    transform: scale(0.97);
+}
