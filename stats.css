@@ -137,3 +137,8 @@ body{
         background-clip: unset;
     }
 }
+
+p{
+    color: lightgreen;
+    font-size: 20px;
+}
