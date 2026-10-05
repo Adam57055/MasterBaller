@@ -186,3 +186,8 @@ h2::after{
         width: min(12rem, 70vw);
     }
 }
+
+p{
+    color: lightpink;
+    font-size: 20px;
+}
