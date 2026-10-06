@@ -8,3 +8,6 @@ The AI developed will assess the player's capabilities in multiple areas of socc
 
 # Development
 I created this software using Cursor. I had an AI-assisted work ethic where I would use Cursor to mainly help me out with text effects to enhance the UI. I built most of the foundation and design. Cursor finished it off like icing on a cake.
+
+# Reflection
+I learned a lot about how to construct software from ground zero to an actual functioning product. I learned about patience, encountering errors, and many other things. I hope to make a product that is deployed and used by real users, especially athletes.
