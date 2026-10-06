@@ -5,11 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About</title>
     <link rel="stylesheet" href="about.css">
+    <link rel="stylesheet" href="nav.css">
 </head>
 <body>
+    <nav class="navbar">
+        <a href="index.html" class="navbar__brand">MasterBaller</a>
+        <button class="navbar__toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+        <ul class="navbar__links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html" class="active">About</a></li>
+            <li><a href="beginning.html">Begin</a></li>
+        </ul>
+    </nav>
     <div class="content">
         <h1>About MasterBaller</h1>
-        <p>MasterBaller was founded by Adam Twam to help aspiring soccer athletes target what's bothering them. The most important part? It's free!</p>
+        <p>MasterBaller was founded by Adam Twam to help aspiring soccer athletes target what's bothering them. The most important part? <span class="accent">It's free!</span></p>
     </div>
+    <script src="nav.js"></script>
 </body>
 </html>
