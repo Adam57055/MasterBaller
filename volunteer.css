@@ -19,6 +19,7 @@ body{
     justify-content: center;
     gap: 20px;
     height: 100vh;
+    padding: 4.5rem 1.5rem 0;
 }
 
 .join{
