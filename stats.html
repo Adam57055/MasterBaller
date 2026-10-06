@@ -5,8 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stats</title>
     <link rel="stylesheet" href="stats.css">
+    <link rel="stylesheet" href="nav.css">
 </head>
 <body>
+    <nav class="navbar">
+        <a href="index.html" class="navbar__brand">MasterBaller</a>
+        <button class="navbar__toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+        <ul class="navbar__links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="beginning.html">Begin</a></li>
+            <li><a href="evaluation.html">Evaluate</a></li>
+            <li><a href="stats.html" class="active">Stats</a></li>
+            <li><a href="test.html">Test</a></li>
+            <li><a href="results.html">Results</a></li>
+        </ul>
+    </nav>
     <div class="content">
         <h1 class="stats-headline">
             <span class="stats-headline__lead">Let's see your current</span>
@@ -15,5 +28,6 @@
         <h2>Answer the following to the best of your ability.</h2>
         <p>How far can you run in one sitting?</p>
     </div>
+    <script src="nav.js"></script>
 </body>
 </html>

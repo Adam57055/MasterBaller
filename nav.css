@@ -1,0 +1,112 @@
+.navbar{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.75rem;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(125, 211, 252, 0.12);
+}
+
+.navbar__brand{
+    font-family: 'Tektur', 'Geomini', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    background: linear-gradient(
+        120deg,
+        #7dd3fc 0%,
+        #e0f2fe 40%,
+        #38bdf8 70%,
+        #7dd3fc 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    transition: filter 0.25s ease;
+}
+
+.navbar__brand:hover{
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.55));
+}
+
+.navbar__links{
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar__links a{
+    font-family: 'Tektur', 'Geomini', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #94a3b8;
+    padding: 0.45rem 0.85rem;
+    border-radius: 4px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.navbar__links a:hover{
+    color: #e0f2fe;
+    background: rgba(125, 211, 252, 0.08);
+}
+
+.navbar__links a.active{
+    color: #7dd3fc;
+    background: rgba(56, 189, 248, 0.12);
+}
+
+.navbar__toggle{
+    display: none;
+    background: none;
+    border: 1px solid rgba(125, 211, 252, 0.25);
+    border-radius: 4px;
+    color: #7dd3fc;
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 0.35rem 0.55rem;
+    cursor: pointer;
+}
+
+@media (max-width: 720px){
+    .navbar__toggle{
+        display: block;
+    }
+
+    .navbar__links{
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 0.5rem;
+        background: rgba(10, 10, 10, 0.96);
+        border-bottom: 1px solid rgba(125, 211, 252, 0.12);
+    }
+
+    .navbar__links.is-open{
+        display: flex;
+    }
+
+    .navbar__links a{
+        padding: 0.85rem 1rem;
+    }
+}

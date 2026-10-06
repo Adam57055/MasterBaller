@@ -5,13 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evaluation</title>
     <link rel="stylesheet" href="evaluation.css">
+    <link rel="stylesheet" href="nav.css">
 </head>
 <body>
+    <nav class="navbar">
+        <a href="index.html" class="navbar__brand">MasterBaller</a>
+        <button class="navbar__toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+        <ul class="navbar__links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="beginning.html">Begin</a></li>
+            <li><a href="evaluation.html" class="active">Evaluate</a></li>
+            <li><a href="stats.html">Stats</a></li>
+            <li><a href="test.html">Test</a></li>
+            <li><a href="results.html">Results</a></li>
+        </ul>
+    </nav>
     <div class="content">
         <h1>Are you currently a player?</h1>
         <a href="stats.html" class="stats">Yes</a>
         <a href="test.html" class="test">No, I need to see what I'm capable of.</a>
         <a href="results.html" class="submit">Submit</a>
     </div>
+    <script src="nav.js"></script>
 </body>
 </html>
