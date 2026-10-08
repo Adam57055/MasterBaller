@@ -157,13 +157,14 @@ button{
     border-radius: 5px;
     cursor: pointer;
     transition: 0.2s ease-in-out;
+    text-decoration: none;
 }
 
-button:hover{
+.button:hover{
     transform: scale(1.05);
     background-color: lightcoral;
 }
 
-button:active{
+.button:active{
     transform: scale(0.98);
 }
