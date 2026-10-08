@@ -142,3 +142,9 @@ p{
     color: lightgreen;
     font-size: 20px;
 }
+
+.answer{
+    background-color: black;
+    color: white;
+    padding: 12px 15px;
+}
