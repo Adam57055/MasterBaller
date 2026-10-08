@@ -148,3 +148,22 @@ p{
     color: white;
     padding: 12px 15px;
 }
+
+button{
+    background-color: lightcyan;
+    color: black;
+    padding: 24px 36px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+button:hover{
+    transform: scale(1.05);
+    background-color: lightcoral;
+}
+
+button:active{
+    transform: scale(0.98);
+}
