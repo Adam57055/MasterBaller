@@ -159,3 +159,22 @@
     transform: scale(0.97);
   }
   
+.login{
+  background-color: lightcoral;
+  color: black;
+  padding: 20px 25px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: 0.2s ease-in-out;
+}
+
+.login:hover{
+  transform: scale(1.05);
+  background-color: lightsalmon;
+}
+
+.login:active{
+  transform: scale(0.98);
+}
