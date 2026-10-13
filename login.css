@@ -21,6 +21,11 @@ body{
     height: 100vh;
 }
 
+h1{
+    font-size: 35px;
+    color: lightgreen;
+}
+
 /* From Uiverse.io by bociKond */ 
 .form {
     --bg-light: #efefef;
@@ -87,6 +92,10 @@ body{
     color: var(--bg-dark);
   }
   
+  .form .submit:active{
+    transform: scale(0.98);
+  }
+
   .span {
     text-decoration: none;
     color: var(--bg-dark);
