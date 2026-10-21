@@ -24,110 +24,16 @@
   </nav>
 
   <div class="content">
-    <h1 class="title1">One step to greatness.</h1>
-    <h2 class="title2">Create your account.</h2>
-
-    <form class="form" id="signup-form">
-      <input id="name" class="input"
-        placeholder="Enter your name"
-        type="text" autocomplete="name" required>
-
-      <input id="email" class="input"
-        placeholder="Enter your email"
-        type="email" autocomplete="email" required>
-
-      <input id="password" class="input"
-        placeholder="Create a password"
-        type="password" autocomplete="new-password"
-        minlength="8" required>
-
-      <button class="button" type="submit" id="submit-btn">
-        Create Account
-      </button>
-
-      <button class="button" type="button" id="google-btn">
-        Continue with Google
-      </button>
-
-      <p id="message" role="status" aria-live="polite"></p>
-      <p>Already have an account? <a href="login.html" class="login">Log in</a></p>
-    </form>
-  </div>
-
-  <script src="nav.js"></script>
-
-  <script type="module">
-    import { createClient } from
-      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-    const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
-    const SUPABASE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
-
-    const supabase = createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
-
-    const form = document.getElementById('signup-form');
-    const message = document.getElementById('message');
-    const submitBtn = document.getElementById('submit-btn');
-    const googleBtn = document.getElementById('google-btn');
-
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      submitBtn.disabled = true;
-      message.textContent = 'Creating your account...';
-
-      try {
-        const name = document.getElementById('name').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: name },
-            emailRedirectTo:
-              `${window.location.origin}/evaluation.html`
-          }
-        });
-
-        if (error) throw error;
-
-        if (data.session) {
-          window.location.assign('evaluation.html');
-        } else {
-          message.textContent =
-            'Account created! Check your email to confirm your account before logging in.';
-        }
-      } catch (error) {
-        message.textContent = error.message;
-      } finally {
-        submitBtn.disabled = false;
-      }
-    });
-
-    googleBtn.addEventListener('click', async () => {
-      googleBtn.disabled = true;
-      message.textContent = 'Connecting to Google...';
-
-      try {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo:
-              `${window.location.origin}/evaluation.html`
-          }
-        });
-
-        if (error) throw error;
-      } catch (error) {
-        message.textContent = error.message;
-        googleBtn.disabled = false;
-      }
-    });
-  </script>
+    <h1 class="title1">What can you achieve?</h1>
+    <h2 class="title2">Insert your stats.</h2>
+    <p>How many seconds does it take you to sprint 30 meters?</p>
+    <input type="text" placeholder="enter answer:" class="input">
+    <p>How many seconds does it take you to sprint 30 meters?</p>
+    <input type="text" placeholder="enter answer:" class="input">
+    <p>How far can you run in 6 minutes?</p>
+    <input type ="text" placeholder="enter answer:" class="input">
+    <p>How many seconds does it take you to dribble through 6 cones spaced 2 meters apart, and how many cones do you hit?</p>
+    <input type="text" placeholder="enter answer:" class="input">
+    
 </body>
 </html>
