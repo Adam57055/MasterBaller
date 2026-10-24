@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,11 +8,15 @@
   <link rel="stylesheet" href="beginning.css">
   <link rel="stylesheet" href="nav.css">
 </head>
+
 <body>
   <nav class="navbar">
     <a href="index.html" class="navbar__brand">MasterBaller</a>
+
     <button class="navbar__toggle"
-      aria-label="Toggle menu" aria-expanded="false">☰</button>
+      aria-label="Toggle menu"
+      aria-expanded="false">☰</button>
+
     <ul class="navbar__links">
       <li><a href="index.html">Home</a></li>
       <li><a href="about.html">About</a></li>
@@ -23,31 +27,63 @@
     </ul>
   </nav>
 
-  <div class="content">
+  <main class="content">
     <h1 class="title1">What can you achieve?</h1>
-    <h2 class="title2">Insert your stats.</h2>
-    <p>How many seconds does it take you to sprint 30 meters?</p>
-    <input type="text" placeholder="Enter answer:" class="input">
-    <p>How many seconds does it take you to sprint 30 meters?</p>
-    <input type="text" placeholder="Enter answer:" class="input">
-    <p>How far can you run in 6 minutes?</p>
-    <input type ="text" placeholder="Enter answer:" class="input">
-    <p>How many seconds does it take you to dribble through 6 cones spaced 2 meters apart, and how many cones do you hit?</p>
-    <input type="text" placeholder="Enter answer:" class="input">
-    <p>Out of 10 passes from 10 meters away, how many go through a 1-meter-wide target?</p>
-    <input type="text" placeholder="Enter answer:" class="input">
-    <p>Out of 10 shots from 12 meters away, how many hit the target? Record your stronger and weaker foot separately.</p>
-    <input type="text" placeholder="Enter answer:" class="input">
-    <p>In 10 one-on-one attempts against the same opponent, how many times do you stop them from dribbling past you?</p>
-    <input type="text" placeholder="Enter answer:" class="input">
-    <p>During a 10-minute small-sided game, how many passes do you intercept?</p>
-    <input type="text" placeholder="Enter answer:" class="input">
-    <p>In 10 attempts, how many times can you keep the ball from a defender for 5 seconds?</p>
-    <input type="text" placeholder="Enter answer:" class="input">
-    <p>Out of 10 controlled, similarly paced shots, how many do you save?</p>
-    <input type="text" placeholder="Enter answer:" class="input">
-    <p>During a 10-minute small-sided game, how many clear, useful instructions do you give teammates?</p>
-    <input type="text" placeholder="Enter answer:" class="input">
-    <button class="submit">Submit</button>
+    <h2 class="title2">Enter Your Stats</h2>
+
+    <form id="stats-form">
+      <label for="sprint">How many seconds does it take you
+        to sprint 30 meters?</label>
+      <input id="sprint" name="sprint" type="number"
+        step="0.01" min="0" class="input">
+
+      <label for="distance">How far can you run in 6 minutes?</label>
+      <input id="distance" name="distance" type="number"
+        min="0" class="input">
+
+      <label for="dribbling">How many seconds does it take you
+        to dribble through 6 cones spaced 2 meters apart?</label>
+      <input id="dribbling" name="dribbling" type="number"
+        step="0.01" min="0" class="input">
+
+      <label for="passing">Out of 10 passes from 10 meters away,
+        how many go through a 1-meter-wide target?</label>
+      <input id="passing" name="passing" type="number"
+        min="0" max="10" class="input">
+
+      <label for="shooting">Out of 10 shots from 12 meters away,
+        how many hit the target?</label>
+      <input id="shooting" name="shooting" type="number"
+        min="0" max="10" class="input">
+
+      <label for="defending">In 10 one-on-one attempts,
+        how many times do you stop your opponent?</label>
+      <input id="defending" name="defending" type="number"
+        min="0" max="10" class="input">
+
+      <label for="interceptions">How many passes do you intercept
+        during a 10-minute small-sided game?</label>
+      <input id="interceptions" name="interceptions" type="number"
+        min="0" class="input">
+
+      <label for="possession">In 10 attempts, how many times can
+        you keep the ball from a defender for 5 seconds?</label>
+      <input id="possession" name="possession" type="number"
+        min="0" max="10" class="input">
+
+      <label for="goalkeeping">Out of 10 controlled shots,
+        how many do you save?</label>
+      <input id="goalkeeping" name="goalkeeping" type="number"
+        min="0" max="10" class="input">
+
+      <label for="communication">How many useful instructions
+        do you give teammates during a 10-minute game?</label>
+      <input id="communication" name="communication" type="number"
+        min="0" class="input">
+
+      <button type="submit" class="submit">Submit</button>
+    </form>
+  </main>
 </body>
 </html>
+```
