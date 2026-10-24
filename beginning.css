@@ -69,34 +69,38 @@
     to{ background-position: 200% center; }
 }
 
-.content{
-    color: white;
-    background: #0a0a0a;
-    display: grid;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    height: 100vh;
+.content {
+  color: white;
+  background: #0a0a0a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  min-height: 100vh;
+  height: auto;
+  padding: 100px 24px 40px;
 }
 
 /* From Uiverse.io by aboalsim114 */ 
-.form {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 20px;
-    background: linear-gradient(to bottom, #0077be, #3b8df2);
-    border-radius: 10px;
-    overflow: hidden;
-    perspective: 1000px;
-    transform-style: preserve-3d;
-    transform: rotateX(-10deg);
-    transition: all 0.3s ease-in-out;
-    box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
-    animation: form-animation 0.5s ease-in-out;
-  }
+#stats-form {
+  width: min(100%, 650px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background: linear-gradient(to bottom, #101d30, #0a0a0a);
+  border: 1px solid #3b8df2;
+  border-radius: 12px;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  animation: form-animation 0.5s ease-in-out;
+}
+
+#stats-form label,
+#stats-form .input {
+  display: block;
+  width: 100%;
+}
   
   @keyframes form-animation {
     from {
@@ -184,15 +188,7 @@ p{
   font-size: 15px;
 }
 
-.input{
-  padding: 15px 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: lightgreen;
-  color: lightsalmon;
-}
-
-button{
+.button{
   background-color: lightpink;
   color: white;
   padding: 15px 20px;
@@ -208,4 +204,14 @@ button:hover{
 
 button:active{
   transform: scale(0.97);
+}
+
+@media (max-width: 480px){
+  .content{
+    padding: 88px 16px 32px;
+  }
+
+  #stats-form{
+    padding: 18px;
+  }
 }
