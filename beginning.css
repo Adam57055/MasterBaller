@@ -238,3 +238,36 @@ p {
         transition: none;
     }
 }
+
+/* Fix input interaction and preserve stable hover effects */
+#stats-form {
+  position: relative;
+  isolation: isolate;
+}
+
+#stats-form label {
+  position: relative;
+  z-index: 1;
+}
+
+#stats-form input,
+#stats-form textarea,
+#stats-form select {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+  color: #ffffff;
+  caret-color: #7dd3fc;
+}
+
+#stats-form input:focus,
+#stats-form textarea:focus,
+#stats-form select:focus {
+  background-color: #172943;
+  border-color: #7dd3fc;
+  outline: 2px solid rgba(125, 211, 252, 0.25);
+  outline-offset: 2px;
+}
