@@ -1,27 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results</title>
-    <link rel="stylesheet" href="results.css">
-    <link rel="stylesheet" href="nav.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Your Player Analysis | MasterBaller</title>
+
+  <link rel="stylesheet" href="nav.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #f4f7f4;
+      color: #18251c;
+      font-family: Arial, sans-serif;
+    }
+
+    .results-container {
+      width: min(900px, 92%);
+      margin: 50px auto;
+    }
+
+    .results-header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .results-header h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      margin-bottom: 12px;
+    }
+
+    .results-header p {
+      color: #526357;
+      line-height: 1.6;
+    }
+
+    .results-card {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.06);
+      margin-bottom: 25px;
+    }
+
+    .results-card h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+
+    .report {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.8;
+      font-size: 1rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-item {
+      background: #f1f6f1;
+      padding: 16px;
+      border-radius: 10px;
+    }
+
+    .stat-item strong {
+      display: block;
+      margin-bottom: 7px;
+      color: #244d32;
+    }
+
+    .stat-item span {
+      overflow-wrap: anywhere;
+    }
+
+    .results-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .action-button {
+      display: inline-block;
+      padding: 13px 22px;
+      border: none;
+      border-radius: 8px;
+      background: #245c36;
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .action-button:hover {
+      background: #194527;
+    }
+
+    .secondary-button {
+      background: #e1e9e2;
+      color: #18251c;
+    }
+
+    .secondary-button:hover {
+      background: #d1ded3;
+    }
+
+    .notice {
+      color: #59665c;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 600px) {
+      .results-container {
+        margin: 30px auto;
+      }
+
+      .results-card {
+        padding: 20px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <nav class="navbar">
-        <a href="index.html" class="navbar__brand">MasterBaller</a>
-        <button class="navbar__toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
-        <ul class="navbar__links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="beginning.html">Begin</a></li>
-            <li><a href="volunteer.html">Volunteer</a></li>
-            <li><a href="faq.html">FAQ</a></li>
-        </ul>
-    </nav>
-    <div class="content">
-        <h1>Here is what we <span class="big">Discovered</span></h1>
-        <h2>Your skills align with...</h2>
+
+  <nav class="navbar">
+    <a href="index.html" class="navbar__brand">MasterBaller</a>
+
+    <button
+      class="navbar__toggle"
+      aria-label="Toggle menu"
+      aria-expanded="false"
+      aria-controls="primary-navigation">
+      ☰
+    </button>
+
+    <ul class="navbar__links" id="primary-navigation">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="beginning.html">Begin</a></li>
+      <li><a href="volunteer.html">Volunteer</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+      <li><a href="support.html">Support</a></li>
+    </ul>
+  </nav>
+
+  <main class="results-container">
+
+    <header class="results-header">
+      <h1>Your Player Analysis</h1>
+
+      <p>
+        Personalized soccer feedback and training recommendations
+        powered by the MasterBaller AI Coach.
+      </p>
+    </header>
+
+    <section class="results-card">
+      <h2>Your Performance Report</h2>
+
+      <div id="report" class="report" aria-live="polite">
+        Loading your report...
+      </div>
+    </section>
+
+    <section class="results-card">
+      <h2>Your Submitted Statistics</h2>
+
+      <div id="stats-grid" class="stats-grid"></div>
+    </section>
+
+    <p class="notice">
+      These recommendations are based on your submitted measurements.
+      They are intended to support your development, not replace
+      feedback from a qualified coach who has observed you play.
+    </p>
+
+    <div class="results-actions">
+      <a href="beginning.html" class="action-button">
+        Retake Assessment
+      </a>
+
+      <button
+        id="print-button"
+        class="action-button secondary-button"
+        type="button">
+        Print Results
+      </button>
     </div>
+
+  </main>
+
+  <script>
+    // Mobile navigation
+    const menuToggle = document.querySelector('.navbar__toggle');
+    const navigation = document.querySelector('.navbar__links');
+
+    menuToggle.addEventListener('click', () => {
+      const isOpen = navigation.classList.toggle('is-open');
+      menuToggle.setAttribute('aria-expanded', isOpen);
+    });
+
+    // Read the AI report from the previous page
+    const reportElement = document.getElementById('report');
+    const statsGrid = document.getElementById('stats-grid');
+
+    const savedResults = sessionStorage.getItem('masterballerResults');
+
+    const labels = {
+      sprint: '30-meter sprint',
+      distance: 'Distance in 6 minutes',
+      dribbling: '6-cone dribbling',
+      passing: 'Accurate passes',
+      shooting: 'Shots on target',
+      defending: 'Successful defensive stops',
+      interceptions: 'Interceptions',
+      possession: 'Successful possession attempts',
+      goalkeeping: 'Saves',
+      communication: 'Useful instructions'
+    };
+
+    if (!savedResults) {
+      reportElement.textContent =
+        'No report was found. Please submit your statistics first.';
+
+    } else {
+      try {
+        const results = JSON.parse(savedResults);
+
+        if (
+          typeof results.analysis !== 'string' ||
+          !results.stats
+        ) {
+          throw new Error('Invalid saved results');
+        }
+
+        // Use textContent to safely display AI-generated text.
+        reportElement.textContent = results.analysis;
+
+        for (const [key, label] of Object.entries(labels)) {
+          const item = document.createElement('div');
+          item.className = 'stat-item';
+
+          const heading = document.createElement('strong');
+          heading.textContent = label;
+
+          const value = document.createElement('span');
+          value.textContent = results.stats[key];
+
+          item.appendChild(heading);
+          item.appendChild(value);
+
+          statsGrid.appendChild(item);
+        }
+
+      } catch (error) {
+        reportElement.textContent =
+          'Your report could not be displayed. Please submit your statistics again.';
+      }
+    }
+
+    document.getElementById('print-button').addEventListener('click', () => {
+      window.print();
+    });
+  </script>
+
 </body>
 </html>
