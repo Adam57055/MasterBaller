@@ -1,11 +1,10 @@
-import json
 import os
-from http.server import BaseHTTPRequestHandler
-
 from openai import OpenAI
 
-
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(
+    api_key=os.environ.get("GROQ_API_KEY"),
+    base_url="https://api.groq.com/openai/v1"
+)
 
 EXPECTED_FIELDS = {
     "sprint",
