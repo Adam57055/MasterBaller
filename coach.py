@@ -198,7 +198,10 @@ Create a practical 4-week development plan. Include drills,
 suggested frequency, repetitions or duration, recovery, and
 progression. Adapt the plan to the results rather than giving
 generic advice. Keep the workload age-appropriate and emphasize
-proper technique, rest, and injury prevention.
+proper technique, rest, and injury prevention. Also prioritize health and nutrition,
+specifically diet. Give a disclaimer that you are not a medical professional and to
+double-check important medical information. Advise to consult a medical professional
+if wanting to take a drastic change in diet.
 
 6. TECHNICAL AND TACTICAL DEVELOPMENT
 Give specific recommendations for passing, shooting, dribbling,
