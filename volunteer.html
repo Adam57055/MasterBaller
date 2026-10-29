@@ -10,20 +10,31 @@
 <body>
     <nav class="navbar">
         <a href="index.html" class="navbar__brand">MasterBaller</a>
-        <button class="navbar__toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
-        <ul class="navbar__links">
+      
+        <button class="navbar__toggle"
+            aria-label="Toggle menu"
+            aria-expanded="false"
+            aria-controls="primary-navigation">☰</button>
+      
+        <ul class="navbar__links" id="primary-navigation">
             <li><a href="index.html">Home</a></li>
             <li><a href="about.html">About</a></li>
-            <li><a href="beginning.html">Begin</a></li>
+            <li><a href="beginning.html" class="active" aria-current="page">Begin</a></li>
             <li><a href="volunteer.html">Volunteer</a></li>
             <li><a href="faq.html">FAQ</a></li>
             <li><a href="support.html">Support</a></li>
-        </ul>
-    </nav>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </nav>
     <div class="content">
         <h1>Be a part of the <span>team</span></h1>
         <h2>Want to build something great?</h2>
-        <h3>Sign up with the form below. We'll get back to you in 24 hours.</h3>
+        <h3 class="why">Why should you join?</h3>
+        <p>There are many benefits to becoming a part of the MasterBaller team:</p>
+        <p>- College Application activity</p>
+        <p>- Software experience</p>
+        <p>- Getting to work on something used by athletes</p>
+        <h3 class="sign">Sign up with the form below. We'll get back to you in 24 hours.</h3>
         <a href="https://forms.gle/vT4m6a4ymzUbRhn18" class="join">Join us</a>
     </div>
     <script src="nav.js"></script>

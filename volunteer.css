@@ -173,3 +173,13 @@ h3{
 @keyframes accent-shine{
     to{ background-position: 200% center; }
 }
+
+.why{
+    color: lightgreen;
+    font-size: 35px;
+}
+
+.sign{
+    color: lightcoral;
+    font-size: 35px;
+}
