@@ -21,3 +21,7 @@ body{
     height: 100vh;
 }
 
+p{
+    color: lightslategray;
+    font-size: 20px;
+}
