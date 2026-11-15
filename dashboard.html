@@ -1,15 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1712">
+  <title>Touchline | Player Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <div class="content">
-        <h1>Let's get to D1</h1>
-        
-    </div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="index.html"><span class="brand-mark">t.</span><span>touchline<small>THE PLAYER DEVELOPMENT HUB</small></span></a>
+      <div class="side-label">YOUR GAME</div>
+      <nav class="side-nav" aria-label="Dashboard navigation">
+        <a class="active" href="dashboard.html">Overview</a>
+        <a href="#performance">My performance</a>
+        <a href="#training">Training plan</a>
+        <a href="#pathway">D1 pathway</a>
+        <a href="volunteer.html">Opportunities</a>
+      </nav>
+      <div class="side-label season-label">MY SEASON</div>
+      <nav class="side-nav">
+        <a href="#progress">Goals &amp; milestones</a>
+        <a href="#profile">Player profile</a>
+      </nav>
+      <div class="next-chapter">
+        <span class="eyebrow">YOUR NEXT CHAPTER</span>
+        <h3>Build your player profile</h3>
+        <p>Keep completing assessments to track your development.</p>
+        <a href="beginning.html">Take assessment ↗</a>
+      </div>
+      <div class="sidebar-profile" id="profile">
+        <strong id="player-name">Player</strong>
+        <span id="player-position">Soccer development</span>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <button class="menu-toggle" aria-label="Open navigation">☰</button>
+          <p class="eyebrow">PLAYER OVERVIEW</p>
+          <h1>Every session. A step closer.</h1>
+          <p class="subheading">Your development, measured one assessment at a time.</p>
+        </div>
+        <a class="profile-button" href="beginning.html">New assessment <span>↗</span></a>
+      </header>
+
+      <section id="empty-state" class="empty-state" hidden>
+        <div class="empty-icon">◎</div>
+        <p class="eyebrow">YOUR PLAYER DASHBOARD</p>
+        <h2>Your next level starts here.</h2>
+        <p>Complete the MasterBaller assessment first. Your submitted measurements and AI coach report will appear here automatically.</p>
+        <a class="primary-button" href="beginning.html">Start assessment <span>→</span></a>
+      </section>
+
+      <div id="dashboard-content" hidden>
+        <section class="overview-grid">
+          <article class="score-panel">
+            <div class="panel-heading"><span>ASSESSMENT DRILL AVERAGE</span><span class="score-pill">LIVE FROM YOUR ASSESSMENT</span></div>
+            <div class="score-row"><strong id="overall-score">—</strong><span>/ 100</span><div class="score-message"><h2 id="score-status">Building consistency</h2><p id="score-caption">Average across 5 scored drills</p></div></div>
+            <div class="score-track"><span id="score-fill"></span></div>
+            <div class="score-foot"><span>DEVELOPMENT SNAPSHOT</span><span id="score-count">0 assessments saved</span></div>
+            <p class="score-disclaimer">A simple average of five tests scored out of 10. This is not a professional rating or a complete measure of soccer ability.</p>
+          </article>
+          <article class="progress-panel" id="progress">
+            <div class="panel-title"><div><h2>Progress, not guesswork.</h2><p>Your drill average across recent assessments</p></div><span class="trend-tag">TRACKING</span></div>
+            <svg id="progress-chart" class="progress-chart" viewBox="0 0 620 190" role="img" aria-label="Assessment progress chart"></svg>
+            <p class="chart-note" id="progress-note">Complete an assessment to begin tracking.</p>
+          </article>
+        </section>
+
+        <section class="section-block" id="performance">
+          <div class="section-heading"><div><h2>Your game, broken down</h2><p>Direct results from the five scored assessment drills.</p></div><span class="section-note">Each drill is scored out of 10</span></div>
+          <div class="skill-grid" id="skill-grid"></div>
+        </section>
+
+        <section class="lower-grid">
+          <article class="content-panel" id="training">
+            <div class="section-heading"><div><h2>Put in the work</h2><p>A suggested starting point based on your lowest scored drill.</p></div><span class="section-note">PERSONAL FOCUS</span></div>
+            <div class="focus-card"><span class="eyebrow">YOUR NEXT FOCUS</span><h3 id="focus-title">Training focus</h3><p id="focus-description"></p><span class="focus-score" id="focus-score"></span></div>
+            <div class="panel-divider"></div>
+            <h3 class="subsection-title">Your submitted measurements</h3>
+            <div id="measurement-list" class="measurement-list"></div>
+            <a href="beginning.html" class="text-link">Retake assessment ↗</a>
+          </article>
+          <article class="content-panel pathway-panel" id="pathway">
+            <div class="section-heading"><div><h2>Your player pathway</h2><p>Small, consistent steps build long-term development.</p></div></div>
+            <div class="pathway-callout"><span class="eyebrow">NEXT STEP</span><h3>Repeat your assessment under similar conditions.</h3><p>Consistent testing makes changes easier to interpret.</p></div>
+            <div class="pathway-columns">
+              <div><h4>Build consistency</h4><p>Use the same surface, distance, equipment, and test instructions when possible.</p></div>
+              <div><h4>Review your report</h4><p>Use your AI coach's feedback as a guide, alongside advice from a qualified coach.</p></div>
+            </div>
+            <div class="coach-report-wrap"><h3 class="subsection-title">Your AI coach report</h3><div id="coach-report" class="coach-report"></div></div>
+          </article>
+        </section>
+        <p class="disclaimer">MasterBaller uses self-reported measurements. Results depend on testing conditions and do not determine team selection, recruiting status, or eligibility.</p>
+      </div>
+      <footer class="footer"><span>TOUCHLINE · POWERED BY MASTERBALLER</span><span>Updated <span id="year"></span></span></footer>
+    </main>
+  </div>
+  <script src="dashboard.js"></script>
 </body>
 </html>
