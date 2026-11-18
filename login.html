@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070a10">
+  <title>Log in | MasterBaller</title>
+  <link rel="stylesheet" href="account.css">
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+  <main class="page-shell">
+
+    <section class="auth-panel">
+
+      <nav class="auth-switch">
+        <a class="switch-option active" href="login.html">
+          Log in
+        </a>
+
+        <a class="switch-option" href="signup.html">
+          Create account
+        </a>
+      </nav>
+
+      <div class="intro">
+        <p class="eyebrow">01 / BACK IN THE GAME</p>
+
+        <h1>Get back in the game.</h1>
+
+        <p class="subtitle">
+          Your team is waiting. Let’s get you in.
+        </p>
+      </div>
+
+      <form class="auth-form" id="login-form">
+
+        <div class="field">
+          <label for="email">Email address</label>
+
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <button class="primary-button" type="submit">
+          <span>Log in</span>
+          <span class="arrow">→</span>
+        </button>
+
+        <p
+          class="form-message"
+          id="form-message"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+      </form>
+
+      <p class="account-prompt">
+        Don’t have an account?
+        <a href="signup.html">Sign up</a>
+      </p>
+
+      <div class="panel-rule"></div>
+
+      <p class="panel-note">
+        YOUR CLUB. YOUR COMMUNITY. YOUR TOUCHLINE.
+      </p>
+
+    </section>
+
+    <footer class="site-footer">
+      <span>© 2026 MasterBaller</span>
+      <span>MADE FOR THE BEAUTIFUL GAME</span>
+    </footer>
+
+  </main>
+</body>
+</html>
