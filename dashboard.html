@@ -104,5 +104,26 @@
     </main>
   </div>
   <script src="dashboard.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseClient = window.supabase.createClient(
+  "https://thbrjtqbusxmlufbjyby.supabase.co",
+  "sb_publishable_xMZ7Mg7jnB-_jGxivC1hmw_nvlADovW"
+);
+
+async function checkAuthentication() {
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error || !data.session) {
+    window.location.replace("login.html");
+    return;
+  }
+}
+
+checkAuthentication();
+</script>
+
 </body>
 </html>
