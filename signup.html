@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070a10">
+  <title>Create account | MasterBaller</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js" defer></script>
+  <link rel="stylesheet" href="account.css">
+</head>
+
+<body>
+  <main class="page-shell">
+
+    <section class="auth-panel signup-panel">
+
+      <nav class="auth-switch">
+        <a class="switch-option" href="login.html">
+          Log in
+        </a>
+
+        <a class="switch-option active" href="signup.html">
+          Create account
+        </a>
+      </nav>
+
+      <div class="intro">
+        <p class="eyebrow">02 / JOIN THE CLUB</p>
+
+        <h1>Become D1.</h1>
+
+        <p class="subtitle">
+          One account. A whole world of football.
+        </p>
+      </div>
+
+      <form class="auth-form signup-form" id="signup-form">
+
+        <div class="field">
+          <label for="full-name">Full name</label>
+
+          <input
+            id="full-name"
+            name="fullName"
+            type="text"
+            placeholder="e.g. Alex Morgan"
+            autocomplete="name"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label for="email">Email address</label>
+
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+          >
+        </div>
+
+        <div class="field password-field">
+          <label for="password">Password</label>
+
+          <input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Create a password"
+            autocomplete="new-password"
+            minlength="8"
+            required
+          >
+
+          <p class="field-hint">
+            Use at least 8 characters.
+          </p>
+        </div>
+
+        <p class="terms-copy">
+          By creating an account, you agree to our
+          <a href="#terms">Terms of Service</a>
+          and
+          <a href="#privacy">Privacy Policy</a>.
+        </p>
+
+        <button class="primary-button" type="submit">
+          <span>Create account</span>
+          <span class="arrow">→</span>
+        </button>
+
+        <p
+          class="form-message"
+          id="form-message"
+          role="status"
+          aria-live="polite"
+        ></p>
+
+      </form>
+
+      <p class="account-prompt">
+        Already on the grind?
+        <a href="login.html">Log in</a>
+      </p>
+
+      <div class="panel-rule"></div>
+
+      <p class="panel-note">
+        ALL PLAYERS WELCOME. ALWAYS.
+      </p>
+
+    </section>
+
+    <footer class="site-footer">
+      <span>© 2026 MasterBaller</span>
+      <span>MADE FOR THE BEAUTIFUL GAME</span>
+    </footer>
+
+  </main>
+</body>
+</html>
