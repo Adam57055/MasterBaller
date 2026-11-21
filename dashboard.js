@@ -369,7 +369,7 @@
     sections.forEach(section => observer.observe(section));
   }
 
-  const DATA_URL = "masterballer-data.json";
+  const DATA_URL = "/masterballer-data.json";
   let resourceData = null;
 
   function makeExternalLink(url, label, className = "resource-link") {
