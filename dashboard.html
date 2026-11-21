@@ -24,7 +24,11 @@
         <a class="nav-link" href="#performance">My performance</a>
         <a class="nav-link" href="#training">Training plan</a>
         <a class="nav-link" href="#pathway">D1 pathway</a>
-        <a class="nav-link" href="volunteer.html">Opportunities</a>
+        <a class="nav-link" href="#recruiting">D1 recruiting</a>
+        <a class="nav-link" href="#college-games">College games</a>
+        <a class="nav-link" href="#clubs">Popular clubs</a>
+        <a class="nav-link" href="#scholarships">Scholarships</a>
+        <a class="nav-link" href="volunteer.html">Volunteer opportunities</a>
       </nav>
 
       <p class="side-label season-label">MY SEASON</p>
@@ -79,7 +83,7 @@
       </section>
 
       <div id="dashboard-content" hidden>
-        <section class="overview-grid">
+        <section class="overview-grid" id="assessment-overview">
           <article class="score-panel">
             <div class="panel-heading">
               <span>OVERALL PLAYER SCORE</span>
@@ -128,7 +132,7 @@
           <div class="skill-grid" id="skill-grid"></div>
         </section>
 
-        <section class="lower-grid">
+        <section class="lower-grid" id="training-pathway-grid">
           <article class="content-panel" id="training">
             <div class="section-heading">
               <div>
@@ -193,6 +197,126 @@
           <div id="measurement-list" class="measurement-list"></div>
         </section>
 
+        <section class="content-panel location-panel" id="location-settings">
+          <div class="section-heading">
+            <div>
+              <h2>Your recruiting location</h2>
+              <p>Set the area used to find nearby college programs and matches.</p>
+            </div>
+            <span class="section-note">PLAYER PROFILE</span>
+          </div>
+          <form id="location-form" class="location-form">
+            <label class="location-field" for="profile-city">City
+              <input id="profile-city" name="city" type="text" maxlength="80" placeholder="e.g. Greenville">
+            </label>
+            <label class="location-field" for="profile-state">State
+              <input id="profile-state" name="state" type="text" maxlength="40" placeholder="e.g. South Carolina">
+            </label>
+            <label class="location-field" for="profile-zip">ZIP code
+              <input id="profile-zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{5}" maxlength="5" placeholder="5-digit ZIP">
+            </label>
+            <label class="location-field" for="search-radius">Search radius
+              <select id="search-radius" name="radius">
+                <option value="100">100 miles (default)</option>
+                <option value="150">150 miles</option>
+                <option value="200">200 miles</option>
+                <option value="300">300 miles</option>
+                <option value="500">500 miles</option>
+              </select>
+            </label>
+            <div class="location-actions">
+              <button class="primary-button" type="submit" id="save-location">Save location</button>
+              <span id="location-status" class="form-status" role="status" aria-live="polite">Your location is only used to personalize nearby college results.</span>
+            </div>
+          </form>
+        </section>
+
+        <section class="content-panel directory-panel" id="recruiting">
+          <div class="section-heading">
+            <div>
+              <h2>D1 Recruiting Hub</h2>
+              <p>Explore Division I programs and official coaching-staff contacts.</p>
+            </div>
+            <span class="section-note">MEN'S &amp; WOMEN'S</span>
+          </div>
+          <div class="directory-toolbar">
+            <label for="recruiting-gender">Soccer programs</label>
+            <select id="recruiting-gender">
+              <option value="both">Men's &amp; women's</option>
+              <option value="men">Men's soccer</option>
+              <option value="women">Women's soccer</option>
+            </select>
+          </div>
+          <div class="resource-grid" id="recruiting-results" aria-live="polite">
+            <p class="directory-loading">Loading verified program contacts…</p>
+          </div>
+        </section>
+
+        <section class="content-panel directory-panel" id="college-games">
+          <div class="section-heading">
+            <div>
+              <h2>College Games Near You</h2>
+              <p>Official team schedules and match pages for nearby college programs.</p>
+            </div>
+            <span class="section-note">OFFICIAL SCHEDULES</span>
+          </div>
+          <div class="directory-toolbar">
+            <label for="games-gender">Match category</label>
+            <select id="games-gender">
+              <option value="both">Men's &amp; women's</option>
+              <option value="men">Men's soccer</option>
+              <option value="women">Women's soccer</option>
+            </select>
+          </div>
+          <div class="resource-grid" id="games-results" aria-live="polite">
+            <p class="directory-loading">Loading official schedules…</p>
+          </div>
+          <p class="resource-footnote">Schedules are maintained by each university. Confirm dates, kickoff times, venue details, and ticket information on the official schedule before traveling.</p>
+        </section>
+
+        <section class="content-panel directory-panel" id="clubs">
+          <div class="section-heading">
+            <div>
+              <h2>Popular Football Clubs</h2>
+              <p>Follow major clubs, explore their official sites, and keep up with the game.</p>
+            </div>
+            <span class="section-note">GLOBAL FOOTBALL</span>
+          </div>
+          <div class="directory-toolbar">
+            <label for="club-league">Competition</label>
+            <select id="club-league">
+              <option value="all">All competitions</option>
+            </select>
+          </div>
+          <div class="resource-grid club-grid" id="club-results" aria-live="polite">
+            <p class="directory-loading">Loading clubs…</p>
+          </div>
+        </section>
+
+        <section class="content-panel directory-panel" id="scholarships">
+          <div class="section-heading">
+            <div>
+              <h2>Scholarships &amp; Financial Aid</h2>
+              <p>Explore soccer-related awards and broader student-athlete funding resources.</p>
+            </div>
+            <span class="section-note">FUND YOUR FUTURE</span>
+          </div>
+          <div class="directory-toolbar">
+            <label for="scholarship-status">Opportunity status</label>
+            <select id="scholarship-status">
+              <option value="all">All opportunities</option>
+              <option value="open">Open now</option>
+              <option value="upcoming">Upcoming / recurring</option>
+              <option value="closed">Recently closed</option>
+              <option value="directory">Directories &amp; guidance</option>
+            </select>
+          </div>
+          <div class="resource-grid" id="scholarship-results" aria-live="polite">
+            <p class="directory-loading">Loading scholarship resources…</p>
+          </div>
+          <p class="resource-footnote">Always verify eligibility, award amounts, and deadlines with the scholarship provider. Some awards have geographic or school-specific restrictions.</p>
+        </section>
+
         <p class="disclaimer">MasterBaller uses submitted measurements. Results depend on testing conditions and do not determine team selection, recruiting status, or eligibility.</p>
       </div>
 
@@ -205,8 +329,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // The Supabase publishable key is intended for browser use.
-    // Protect user data with appropriate Supabase Row Level Security policies.
+    // This is the Supabase publishable/anon key. It is intended for browser use;
+    // protect your database with Row Level Security policies.
     const supabaseClient = window.supabase.createClient(
       "https://thbrjtqbusxmlufbjyby.supabase.co",
       "sb_publishable_xMZ7Mg7jnB-_jGxivC1hmw_nvlADovW"
@@ -214,12 +338,10 @@
 
     window.__masterballerAuthReady = (async () => {
       const { data, error } = await supabaseClient.auth.getSession();
-
       if (error || !data.session) {
         window.location.replace("login.html");
         return false;
       }
-
       window.masterballerUser = data.session.user;
       return true;
     })();
