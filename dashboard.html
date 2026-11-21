@@ -3,51 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b1712">
-  <title>Touchline | Player Dashboard</title>
+  <meta name="theme-color" content="#070a10">
+  <title>MasterBaller | Player Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar">
-      <a class="brand" href="index.html"><span class="brand-mark">t.</span><span>MasterBaller<small>THE PLAYER DEVELOPMENT HUB</small></span></a>
-      <div class="side-label">YOUR GAME</div>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">M</span>
+        <span class="brand-copy">MasterBaller<small>THE PLAYER DEVELOPMENT HUB</small></span>
+      </a>
+
+      <p class="side-label">YOUR GAME</p>
       <nav class="side-nav" aria-label="Dashboard navigation">
-        <a class="active" href="dashboard.html">Overview</a>
-        <a href="#performance">My performance</a>
-        <a href="#training">Training plan</a>
-        <a href="#pathway">D1 pathway</a>
-        <a href="volunteer.html">Opportunities</a>
+        <a class="nav-link active" href="#overview">Overview</a>
+        <a class="nav-link" href="#performance">My performance</a>
+        <a class="nav-link" href="#training">Training plan</a>
+        <a class="nav-link" href="#pathway">D1 pathway</a>
+        <a class="nav-link" href="volunteer.html">Opportunities</a>
       </nav>
-      <div class="side-label season-label">MY SEASON</div>
-      <nav class="side-nav">
-        <a href="#progress">Goals &amp; milestones</a>
-        <a href="#profile">Player profile</a>
+
+      <p class="side-label season-label">MY SEASON</p>
+      <nav class="side-nav" aria-label="Season navigation">
+        <a class="nav-link" href="#progress">Goals &amp; milestones</a>
+        <a class="nav-link" href="#player-profile">Player profile</a>
       </nav>
+
       <div class="next-chapter">
         <span class="eyebrow">YOUR NEXT CHAPTER</span>
         <h3>Build your player profile</h3>
-        <p>Keep completing assessments to track your development.</p>
-        <a href="beginning.html">Take assessment ↗</a>
+        <p>Keep completing assessments to understand your development.</p>
+        <a href="beginning.html">Complete assessment <span>↗</span></a>
       </div>
-      <div class="sidebar-profile" id="profile">
-        <strong id="player-name">Player</strong>
-        <span id="player-position">Soccer development</span>
+
+      <div class="sidebar-profile" id="player-profile">
+        <div class="avatar" id="player-avatar">P</div>
+        <div class="profile-copy">
+          <strong id="player-name">Player</strong>
+          <span id="player-position">Soccer development</span>
+        </div>
       </div>
     </aside>
 
-    <main class="main-content">
+    <main class="main-content" id="overview">
       <header class="topbar">
-        <div>
-          <button class="menu-toggle" aria-label="Open navigation">☰</button>
+        <div class="heading-group">
+          <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
           <p class="eyebrow">PLAYER OVERVIEW</p>
           <h1>Every session. A step closer.</h1>
-          <p class="subheading">Your development, measured one assessment at a time.</p>
+          <p class="subheading" id="welcome-message">Your development, measured one assessment at a time.</p>
         </div>
-        <a class="profile-button" href="beginning.html">New assessment <span>↗</span></a>
+        <div class="top-actions">
+          <label class="date-select-wrap" for="history-range">
+            <span class="sr-only">Progress chart range</span>
+            <select id="history-range">
+              <option value="8">Last 8 assessments</option>
+              <option value="4">Last 4 assessments</option>
+              <option value="20">All saved assessments</option>
+            </select>
+          </label>
+          <a class="profile-button" href="#player-profile">View profile <span>↗</span></a>
+        </div>
       </header>
 
       <section id="empty-state" class="empty-state" hidden>
@@ -61,69 +81,149 @@
       <div id="dashboard-content" hidden>
         <section class="overview-grid">
           <article class="score-panel">
-            <div class="panel-heading"><span>ASSESSMENT DRILL AVERAGE</span><span class="score-pill">LIVE FROM YOUR ASSESSMENT</span></div>
-            <div class="score-row"><strong id="overall-score">—</strong><span>/ 100</span><div class="score-message"><h2 id="score-status">Building consistency</h2><p id="score-caption">Average across 5 scored drills</p></div></div>
-            <div class="score-track"><span id="score-fill"></span></div>
-            <div class="score-foot"><span>DEVELOPMENT SNAPSHOT</span><span id="score-count">0 assessments saved</span></div>
-            <p class="score-disclaimer">A simple average of five tests scored out of 10. This is not a professional rating or a complete measure of soccer ability.</p>
+            <div class="panel-heading">
+              <span>OVERALL PLAYER SCORE</span>
+              <span class="score-pill" id="score-count">0 assessments saved</span>
+            </div>
+            <div class="score-row">
+              <strong id="overall-score">—</strong>
+              <span class="score-denominator">/ 100</span>
+              <div class="score-message">
+                <h2 id="score-status">Building consistency.</h2>
+                <p id="score-caption">Average across five scored drills.</p>
+              </div>
+            </div>
+            <div class="score-track" role="progressbar" aria-label="Overall drill average" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="score-progress">
+              <span id="score-fill"></span>
+            </div>
+            <div class="score-foot">
+              <span>ASSESSMENT SNAPSHOT</span>
+              <span id="latest-date">No assessment date</span>
+            </div>
+            <p class="score-disclaimer">A simple average of five assessment drills, not a professional rating or complete measure of soccer ability.</p>
           </article>
+
           <article class="progress-panel" id="progress">
-            <div class="panel-title"><div><h2>Progress, not guesswork.</h2><p>Your drill average across recent assessments</p></div><span class="trend-tag">TRACKING</span></div>
+            <div class="panel-title">
+              <div>
+                <h2>Progress, not guesswork.</h2>
+                <p>Your overall drill average across recent assessments</p>
+              </div>
+              <span class="trend-tag" id="trend-tag">TRACKING</span>
+            </div>
             <svg id="progress-chart" class="progress-chart" viewBox="0 0 620 190" role="img" aria-label="Assessment progress chart"></svg>
+            <div class="chart-axis" id="chart-axis"></div>
             <p class="chart-note" id="progress-note">Complete an assessment to begin tracking.</p>
           </article>
         </section>
 
         <section class="section-block" id="performance">
-          <div class="section-heading"><div><h2>Your game, broken down</h2><p>Direct results from the five scored assessment drills.</p></div><span class="section-note">Each drill is scored out of 10</span></div>
+          <div class="section-heading">
+            <div>
+              <h2>Your game, broken down</h2>
+              <p>Results from your five scored assessment drills.</p>
+            </div>
+            <span class="section-note">SCORED OUT OF 10</span>
+          </div>
           <div class="skill-grid" id="skill-grid"></div>
         </section>
 
         <section class="lower-grid">
           <article class="content-panel" id="training">
-            <div class="section-heading"><div><h2>Put in the work</h2><p>A suggested starting point based on your lowest scored drill.</p></div><span class="section-note">PERSONAL FOCUS</span></div>
-            <div class="focus-card"><span class="eyebrow">YOUR NEXT FOCUS</span><h3 id="focus-title">Training focus</h3><p id="focus-description"></p><span class="focus-score" id="focus-score"></span></div>
+            <div class="section-heading">
+              <div>
+                <h2>Put in the work</h2>
+                <p>A suggested starting point based on your lowest scored drill.</p>
+              </div>
+              <span class="section-note">PERSONAL FOCUS</span>
+            </div>
+            <div class="focus-card">
+              <span class="eyebrow">YOUR NEXT FOCUS</span>
+              <h3 id="focus-title">Training focus</h3>
+              <p id="focus-description">Your training suggestion will appear here.</p>
+              <span class="focus-score" id="focus-score"></span>
+            </div>
             <div class="panel-divider"></div>
-            <h3 class="subsection-title">Your submitted measurements</h3>
-            <div id="measurement-list" class="measurement-list"></div>
+            <div class="training-heading">
+              <h3 class="subsection-title">Your training checklist</h3>
+              <span id="task-progress">0 of 3 complete</span>
+            </div>
+            <div class="task-list" id="task-list"></div>
+            <p class="task-footnote">Training ideas are general suggestions. Adapt drills to your space, equipment, and coaching guidance.</p>
             <a href="beginning.html" class="text-link">Retake assessment ↗</a>
           </article>
+
           <article class="content-panel pathway-panel" id="pathway">
-            <div class="section-heading"><div><h2>Your player pathway</h2><p>Small, consistent steps build long-term development.</p></div></div>
-            <div class="pathway-callout"><span class="eyebrow">NEXT STEP</span><h3>Repeat your assessment under similar conditions.</h3><p>Consistent testing makes changes easier to interpret.</p></div>
-            <div class="pathway-columns">
-              <div><h4>Build consistency</h4><p>Use the same surface, distance, equipment, and test instructions when possible.</p></div>
-              <div><h4>Review your report</h4><p>Use your AI coach's feedback as a guide, alongside advice from a qualified coach.</p></div>
+            <div class="section-heading">
+              <div>
+                <h2>Your player pathway</h2>
+                <p>Small, consistent steps build long-term development.</p>
+              </div>
+              <span class="section-note">YOUR NEXT STEPS</span>
             </div>
-            <div class="coach-report-wrap"><h3 class="subsection-title">Your AI coach report</h3><div id="coach-report" class="coach-report"></div></div>
+            <div class="pathway-callout">
+              <span class="eyebrow">NEXT STEP</span>
+              <h3>Repeat your assessment under similar conditions.</h3>
+              <p>Consistent testing makes changes easier to interpret.</p>
+            </div>
+            <div class="pathway-columns">
+              <div>
+                <h4>Build consistency</h4>
+                <p>Use the same surface, distance, equipment, and test instructions when possible.</p>
+              </div>
+              <div>
+                <h4>Review your report</h4>
+                <p>Use your AI coach's feedback as a guide, alongside advice from a qualified coach.</p>
+              </div>
+            </div>
+            <div class="coach-report-wrap">
+              <h3 class="subsection-title">Your AI coach report</h3>
+              <div id="coach-report" class="coach-report">Your AI coach report will appear here after you complete the assessment.</div>
+            </div>
           </article>
         </section>
-        <p class="disclaimer">MasterBaller uses self-reported measurements. Results depend on testing conditions and do not determine team selection, recruiting status, or eligibility.</p>
+
+        <section class="content-panel measurements-panel" id="measurements">
+          <div class="section-heading">
+            <div>
+              <h2>Assessment measurements</h2>
+              <p>Your submitted values, shown with their original units.</p>
+            </div>
+          </div>
+          <div id="measurement-list" class="measurement-list"></div>
+        </section>
+
+        <p class="disclaimer">MasterBaller uses submitted measurements. Results depend on testing conditions and do not determine team selection, recruiting status, or eligibility.</p>
       </div>
-      <footer class="footer"><span>TOUCHLINE · POWERED BY MASTERBALLER</span><span>Updated <span id="year"></span></span></footer>
+
+      <footer class="footer">
+        <span>MASTERBALLER · PLAYER DEVELOPMENT</span>
+        <span>Updated <span id="year"></span></span>
+      </footer>
     </main>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // The Supabase publishable key is intended for browser use.
+    // Protect user data with appropriate Supabase Row Level Security policies.
+    const supabaseClient = window.supabase.createClient(
+      "https://thbrjtqbusxmlufbjyby.supabase.co",
+      "sb_publishable_xMZ7Mg7jnB-_jGxivC1hmw_nvlADovW"
+    );
+
+    window.__masterballerAuthReady = (async () => {
+      const { data, error } = await supabaseClient.auth.getSession();
+
+      if (error || !data.session) {
+        window.location.replace("login.html");
+        return false;
+      }
+
+      window.masterballerUser = data.session.user;
+      return true;
+    })();
+  </script>
   <script src="dashboard.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-const supabaseClient = window.supabase.createClient(
-  "https://thbrjtqbusxmlufbjyby.supabase.co",
-  "sb_publishable_xMZ7Mg7jnB-_jGxivC1hmw_nvlADovW"
-);
-
-async function checkAuthentication() {
-  const { data, error } = await supabaseClient.auth.getSession();
-
-  if (error || !data.session) {
-    window.location.replace("login.html");
-    return;
-  }
-}
-
-checkAuthentication();
-</script>
-
 </body>
 </html>
