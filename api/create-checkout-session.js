@@ -98,7 +98,7 @@ export default async function handler(req, res) {
     stripeParams.append("mode", "subscription");
     stripeParams.append("line_items[0][price]", STRIPE_PRICE_ID);
     stripeParams.append("line_items[0][quantity]", "1");
-    stripeParams.append("managed_payments[enabled]", "false");
+
 
     stripeParams.append(
       "success_url",
