@@ -76,10 +76,19 @@ async function redirectToCheckout(session) {
 
   const result = await response.json();
 
-  if (!response.ok || !result.url) {
+  if (!response.ok) {
     throw new Error(result.error || "Unable to start checkout.");
   }
-
+  
+  if (result.alreadySubscribed) {
+    window.location.href = "dashboard.html";
+    return;
+  }
+  
+  if (!result.url) {
+    throw new Error("Unable to start checkout.");
+  }
+  
   window.location.href = result.url;
 }
 
