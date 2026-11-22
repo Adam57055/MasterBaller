@@ -1282,10 +1282,17 @@
     setupLocationForm();
 
     try {
-      const response = await fetch(
-        DATA_URL,
-        { cache: "no-cache" }
-      );
+      const response = await fetch("/masterballer-data.json", {
+  cache: "no-store"
+});
+
+if (!response.ok) {
+  throw new Error("Data request failed: " + response.status);
+}
+
+resourceData = await response.json();
+
+console.log("MasterBaller data loaded:", resourceData);
 
       if (!response.ok) {
         throw new Error(
