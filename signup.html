@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,24 +13,16 @@
 
 <body>
   <main class="page-shell">
-
     <section class="auth-panel signup-panel">
 
       <nav class="auth-switch">
-        <a class="switch-option" href="login.html">
-          Log in
-        </a>
-
-        <a class="switch-option active" href="signup.html">
-          Create account
-        </a>
+        <a class="switch-option" href="login.html">Log in</a>
+        <a class="switch-option active" href="signup.html">Create account</a>
       </nav>
 
       <div class="intro">
         <p class="eyebrow">02 / JOIN THE CLUB</p>
-
         <h1>Become D1.</h1>
-
         <p class="subtitle">
           One account. A whole world of football.
         </p>
@@ -39,7 +32,6 @@
 
         <div class="field">
           <label for="full-name">Full name</label>
-
           <input
             id="full-name"
             name="fullName"
@@ -52,7 +44,6 @@
 
         <div class="field">
           <label for="email">Email address</label>
-
           <input
             id="email"
             name="email"
@@ -63,9 +54,22 @@
           >
         </div>
 
+        <div class="field">
+          <label for="date-of-birth">Date of birth</label>
+          <input
+            id="date-of-birth"
+            name="dateOfBirth"
+            type="date"
+            autocomplete="bday"
+            required
+          >
+          <p class="field-hint">
+            You must be at least 13 years old to create an account.
+          </p>
+        </div>
+
         <div class="field password-field">
           <label for="password">Password</label>
-
           <input
             id="password"
             name="password"
@@ -75,26 +79,37 @@
             minlength="8"
             required
           >
-
           <p class="field-hint">
             Use at least 8 characters.
           </p>
         </div>
 
         <p class="terms-copy">
-            By creating an account, you agree to our
-            <a href="https://masterballer.vercel.app/terms.html"
-               target="_blank"
-               rel="noopener noreferrer">
-              Terms of Service
-            </a>
-            and acknowledge our
-            <a href="https://masterballer.vercel.app/privacy.html"
-               target="_blank"
-               rel="noopener noreferrer">
-              Privacy Policy
-            </a>.
-          </p>
+          By creating an account, you agree to our
+          <a href="https://masterballer.vercel.app/terms.html"
+             target="_blank"
+             rel="noopener noreferrer">
+            Terms of Service
+          </a>
+          and acknowledge our
+          <a href="https://masterballer.vercel.app/privacy.html"
+             target="_blank"
+             rel="noopener noreferrer">
+            Privacy Policy
+          </a>.
+        </p>
+
+        <button class="primary-button" type="submit">
+          <span>Create account</span>
+          <span class="arrow">→</span>
+        </button>
+
+        <p
+          class="form-message"
+          id="form-message"
+          role="status"
+          aria-live="polite"
+        ></p>
 
       </form>
 
