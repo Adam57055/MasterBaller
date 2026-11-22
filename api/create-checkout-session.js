@@ -107,7 +107,7 @@ export default async function handler(req, res) {
     // Replace this with the actual free-report page URL.
     stripeParams.append(
       "cancel_url",
-      "https://masterballer.vercel.app/YOUR-FREE-REPORT-PAGE.html"
+      "https://masterballer.vercel.app/results.html"
     );
 
     stripeParams.append("customer_email", user.email);
