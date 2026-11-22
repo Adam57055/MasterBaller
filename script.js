@@ -2,10 +2,39 @@
 const SUPABASE_URL = "https://thbrjtqbusxmlufbjyby.supabase.co";
 const SUPABASE_KEY = "sb_publishable_xMZ7Mg7jnB-_jGxivC1hmw_nvlADovW";
 
+
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+
+// =============================
+// AGE VALIDATION
+// =============================
+
+function calculateAge(dateOfBirth) {
+  const birthDate = new Date(dateOfBirth + "T00:00:00");
+  const today = new Date();
+
+  if (Number.isNaN(birthDate.getTime()) || birthDate > today) {
+    return -1;
+  }
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+
+  const birthdayHasNotOccurred =
+    today.getMonth() < birthDate.getMonth() ||
+    (
+      today.getMonth() === birthDate.getMonth() &&
+      today.getDate() < birthDate.getDate()
+    );
+
+  if (birthdayHasNotOccurred) {
+    age--;
+  }
+
+  return age;
+}
 
 // =============================
 // LOGIN
@@ -29,10 +58,11 @@ if (loginForm) {
     message.textContent = "Logging in...";
 
     try {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
+      const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
 
       if (error) throw error;
 
@@ -48,7 +78,6 @@ if (loginForm) {
   });
 }
 
-
 // =============================
 // SIGN UP
 // =============================
@@ -58,15 +87,42 @@ const signupForm = document.querySelector("#signup-form");
 if (signupForm) {
   const message = document.querySelector("#form-message");
   const button = signupForm.querySelector("button");
+  const dateOfBirthInput =
+    signupForm.querySelector("#date-of-birth");
+
+  // Prevent selecting a future date.
+  dateOfBirthInput.max = new Date().toLocaleDateString("en-CA");
 
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     if (!signupForm.reportValidity()) return;
 
-    const fullName = signupForm.querySelector("#full-name").value.trim();
-    const email = signupForm.querySelector("#email").value.trim();
-    const password = signupForm.querySelector("#password").value;
+    const fullName =
+      signupForm.querySelector("#full-name").value.trim();
+
+    const email =
+      signupForm.querySelector("#email").value.trim();
+
+    const password =
+      signupForm.querySelector("#password").value;
+
+    const dateOfBirth = dateOfBirthInput.value;
+    const age = calculateAge(dateOfBirth);
+
+    // Reject invalid or future birth dates.
+    if (age < 0) {
+      message.textContent = "Please enter a valid date of birth.";
+      return;
+    }
+
+    // Minimum age requirement.
+    if (age < 13) {
+      message.textContent =
+        "You must be at least 13 years old to create a MasterBaller account.";
+
+      return;
+    }
 
     button.disabled = true;
     message.textContent = "Creating your account...";
@@ -79,7 +135,8 @@ if (signupForm) {
           data: {
             full_name: fullName
           },
-          emailRedirectTo: `${window.location.origin}/dashboard.html`
+          emailRedirectTo:
+            `${window.location.origin}/dashboard.html`
         }
       });
 
