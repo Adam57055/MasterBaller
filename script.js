@@ -1,8 +1,6 @@
 
 const SUPABASE_URL = "https://thbrjtqbusxmlufbjyby.supabase.co";
-
-// IMPORTANT: Replace this with your actual Supabase publishable key.
-const SUPABASE_KEY = "sb_publishable_xMZ7Mg7jnB-_jGxivC1hmw_nvlADovW";
+const SUPABASE_KEY = "YOUR_EXISTING_SUPABASE_PUBLISHABLE_KEY";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -28,9 +26,7 @@ function calculateAge(dateOfBirth) {
     (today.getMonth() === birthDate.getMonth() &&
       today.getDate() < birthDate.getDate());
 
-  if (birthdayHasNotOccurred) {
-    age--;
-  }
+  if (birthdayHasNotOccurred) age--;
 
   return age;
 }
@@ -114,7 +110,6 @@ if (signupForm) {
   const dateOfBirthInput =
     signupForm.querySelector("#date-of-birth");
 
-  // Prevent future dates.
   dateOfBirthInput.max = new Date().toISOString().split("T")[0];
 
   signupForm.addEventListener("submit", async (event) => {
@@ -155,8 +150,7 @@ if (signupForm) {
           data: {
             full_name: fullName
           },
-          emailRedirectTo:
-            `${window.location.origin}/payment.html`
+          emailRedirectTo: `${window.location.origin}/payment.html`
         }
       });
 
