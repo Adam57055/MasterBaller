@@ -395,78 +395,285 @@
     card.append(tag, heading, copy);
     return card;
   }
+  const locationCache = new Map();
 
-  function renderRecruiting() {
+  async function getCoordinates(city, state, zip) {
+    const cacheKey = zip
+      ? `zip:${zip}`
+      : `city:${city.toLowerCase()}:${state.toLowerCase()}`;
+  
+    if (locationCache.has(cacheKey)) {
+      return locationCache.get(cacheKey);
+    }
+  
+    const request = (async () => {
+      let url;
+  
+      if (zip) {
+        url = `https://api.zippopotam.us/us/${encodeURIComponent(zip)}`;
+      } else {
+        url = `https://api.zippopotam.us/us/${encodeURIComponent(state)}/${encodeURIComponent(city)}`;
+      }
+  
+      const response = await fetch(url);
+  
+      if (!response.ok) {
+        throw new Error("Could not find coordinates for this location.");
+      }
+  
+      const data = await response.json();
+      const place = data.places?.[0];
+  
+      if (!place) {
+        throw new Error("No location results found.");
+      }
+  
+      return {
+        latitude: Number(place.latitude),
+        longitude: Number(place.longitude),
+        state: place["state abbreviation"] || state
+      };
+    })();
+  
+    locationCache.set(cacheKey, request);
+  
+    try {
+      return await request;
+    } catch (error) {
+      locationCache.delete(cacheKey);
+      throw error;
+    }
+  }
+  
+  function distanceInMiles(a, b) {
+    const radians = degrees => degrees * Math.PI / 180;
+    const earthRadius = 3958.8;
+  
+    const dLat = radians(b.latitude - a.latitude);
+    const dLon = radians(b.longitude - a.longitude);
+  
+    const lat1 = radians(a.latitude);
+    const lat2 = radians(b.latitude);
+  
+    const value =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1) * Math.cos(lat2) *
+      Math.sin(dLon / 2) ** 2;
+  
+    return earthRadius * 2 * Math.atan2(
+      Math.sqrt(value),
+      Math.sqrt(1 - value)
+    );
+  }
+  
+  async function getPlayerLocation() {
+    const saved = readSavedLocation();
+  
+    if (!saved.zip && !(saved.city && saved.state)) {
+      return null;
+    }
+  
+    return getCoordinates(saved.city, saved.state, saved.zip);
+  }
+  async function renderRecruiting() {
     const target = $("recruiting-results");
     if (!target || !resourceData) return;
+  
     target.replaceChildren();
+  
     const gender = $("recruiting-gender")?.value || "both";
+    const saved = readSavedLocation();
+    const radius = Number(saved.radius) || 100;
+  
+    let playerLocation;
+  
+    try {
+      playerLocation = await getPlayerLocation();
+    } catch (error) {
+      target.textContent = "We couldn't locate your saved location. Check your ZIP code or city and state.";
+      return;
+    }
+  
+    if (!playerLocation) {
+      target.textContent = "Set your city and state or ZIP code above to see nearby college programs.";
+      return;
+    }
+  
     let count = 0;
-    (resourceData.collegePrograms || []).forEach(program => {
-      (program.teams || []).filter(team => gender === "both" || team.gender === gender).forEach(team => {
-        count++;
-        const card = makeResourceCard(
-          program.school + " · " + (team.gender === "men" ? "Men's Soccer" : "Women's Soccer"),
-          program.division + " · " + program.conference,
-          program.city + ", " + program.state + " · Head coach: " + (team.headCoach || "See official staff page")
+  
+    for (const program of resourceData.collegePrograms || []) {
+      let collegeLocation;
+  
+      try {
+        collegeLocation = await getCoordinates(
+          program.city,
+          program.state,
+          ""
         );
+      } catch (error) {
+        console.warn("Could not locate:", program.school);
+        continue;
+      }
+  
+      const distance = distanceInMiles(playerLocation, collegeLocation);
+  
+      if (distance > radius) continue;
+  
+      const teams = (program.teams || []).filter(team =>
+        gender === "both" || team.gender === gender
+      );
+  
+      for (const team of teams) {
+        count++;
+  
+        const card = makeResourceCard(
+          program.school + " · " +
+            (team.gender === "men" ? "Men's Soccer" : "Women's Soccer"),
+          program.division + " · " + program.conference,
+          program.city + ", " + program.state +
+            " · Approximately " + Math.round(distance) + " miles away" +
+            " · Head coach: " + (team.headCoach || "See official staff page")
+        );
+  
         const contacts = document.createElement("div");
         contacts.className = "contact-list";
+  
         (team.staff || []).forEach(person => {
           const row = document.createElement("div");
           row.className = "contact-row";
+  
           const personName = document.createElement("strong");
-          personName.textContent = person.name + (person.title ? " · " + person.title : "");
+          personName.textContent =
+            person.name + (person.title ? " · " + person.title : "");
+  
           row.append(personName);
-          const details = [];
-          if (person.email) details.push(makeExternalLink("mailto:" + person.email, person.email, "contact-link"));
-          if (person.phone) details.push(makeExternalLink("tel:" + person.phone.replace(/[^0-9+]/g, ""), person.phone, "contact-link"));
-          details.forEach(link => row.append(link));
+  
+          if (person.email) {
+            row.append(
+              makeExternalLink(
+                "mailto:" + person.email,
+                person.email,
+                "contact-link"
+              )
+            );
+          }
+  
+          if (person.phone) {
+            row.append(
+              makeExternalLink(
+                "tel:" + person.phone.replace(/[^0-9+]/g, ""),
+                person.phone,
+                "contact-link"
+              )
+            );
+          }
+  
           contacts.append(row);
         });
+  
         card.append(contacts);
+  
         const actions = document.createElement("div");
         actions.className = "resource-actions";
-        if (team.staffDirectoryUrl) actions.append(makeExternalLink(team.staffDirectoryUrl, "Official coaching staff ↗"));
-        if (team.scheduleUrl) actions.append(makeExternalLink(team.scheduleUrl, "Team schedule ↗"));
+  
+        if (team.staffDirectoryUrl) {
+          actions.append(
+            makeExternalLink(team.staffDirectoryUrl, "Official coaching staff ↗")
+          );
+        }
+  
+        if (team.scheduleUrl) {
+          actions.append(
+            makeExternalLink(team.scheduleUrl, "Team schedule ↗")
+          );
+        }
+  
         card.append(actions);
         target.append(card);
-      });
-    });
+      }
+    }
+  
     if (!count) {
-      const empty = document.createElement("p");
-      empty.className = "directory-loading";
-      empty.textContent = "No programs are available for this filter in the current starter dataset.";
-      target.append(empty);
+      target.textContent =
+        "No college programs in the current dataset were found within " +
+        radius + " miles of your saved location.";
     }
   }
 
-  function renderCollegeSchedules() {
+  async function renderCollegeSchedules() {
     const target = $("games-results");
     if (!target || !resourceData) return;
+  
     target.replaceChildren();
+  
     const gender = $("games-gender")?.value || "both";
+    const saved = readSavedLocation();
+    const radius = Number(saved.radius) || 100;
+  
+    let playerLocation;
+  
+    try {
+      playerLocation = await getPlayerLocation();
+    } catch (error) {
+      target.textContent = "We couldn't locate your saved location. Check your ZIP code or city and state.";
+      return;
+    }
+  
+    if (!playerLocation) {
+      target.textContent = "Set your location above to see nearby college soccer schedules.";
+      return;
+    }
+  
     let count = 0;
-    (resourceData.collegePrograms || []).forEach(program => {
-      (program.teams || []).filter(team => gender === "both" || team.gender === gender).forEach(team => {
-        count++;
-        const card = makeResourceCard(
-          program.school + " · " + (team.gender === "men" ? "Men's" : "Women's"),
-          "OFFICIAL COLLEGE SCHEDULE",
-          "Open the university schedule for published fixtures, results, venues, and ticket details."
+  
+    for (const program of resourceData.collegePrograms || []) {
+      let collegeLocation;
+  
+      try {
+        collegeLocation = await getCoordinates(
+          program.city,
+          program.state,
+          ""
         );
-        if (team.scheduleUrl) card.append(makeExternalLink(team.scheduleUrl, "View official schedule ↗"));
+      } catch (error) {
+        continue;
+      }
+  
+      const distance = distanceInMiles(playerLocation, collegeLocation);
+  
+      if (distance > radius) continue;
+  
+      const teams = (program.teams || []).filter(team =>
+        gender === "both" || team.gender === gender
+      );
+  
+      for (const team of teams) {
+        count++;
+  
+        const card = makeResourceCard(
+          program.school + " · " +
+            (team.gender === "men" ? "Men's" : "Women's"),
+          "OFFICIAL COLLEGE SCHEDULE",
+          program.city + ", " + program.state +
+            " · Approximately " + Math.round(distance) + " miles away"
+        );
+  
+        if (team.scheduleUrl) {
+          card.append(
+            makeExternalLink(team.scheduleUrl, "View official schedule ↗")
+          );
+        }
+  
         target.append(card);
-      });
-    });
+      }
+    }
+  
     if (!count) {
-      const empty = document.createElement("p");
-      empty.className = "directory-loading";
-      empty.textContent = "No official schedules are available for this filter yet.";
-      target.append(empty);
+      target.textContent =
+        "No college schedules in the current dataset were found within " +
+        radius + " miles of your saved location.";
     }
   }
-
   function renderClubs() {
     const target = $("club-results");
     if (!target || !resourceData) return;
@@ -500,7 +707,24 @@
     target.replaceChildren();
     const filter = $("scholarship-status")?.value || "all";
     const items = resourceData.scholarshipOpportunities || [];
-    const visible = items.filter(item => filter === "all" || scholarshipCategory(item) === filter);
+    const saved = readSavedLocation();
+const playerState = String(saved.state || "").trim().toUpperCase();
+
+const visible = items.filter(item => {
+  const matchesStatus =
+    filter === "all" || scholarshipCategory(item) === filter;
+
+  if (!matchesStatus) return false;
+
+  const restriction = String(item.locationRestriction || "").toLowerCase();
+
+  // The current starter dataset has a Florida-specific restriction.
+  if (restriction.includes("florida") && playerState && playerState !== "FL") {
+    return false;
+  }
+
+  return true;
+});
     visible.forEach(item => {
       const status = item.status_as_of_2026_11_21 || "Verify current status";
       const card = makeResourceCard(item.name, status, item.amount || "Award amount varies");
@@ -563,11 +787,14 @@
   function readSavedLocation() {
     const local = safeParse(localStorage.getItem("masterballerProfile"), {});
     const metadata = window.masterballerUser?.user_metadata || {};
+  
     return {
-      city: local.recruitingCity || metadata.recruiting_city || "",
-      state: local.recruitingState || metadata.recruiting_state || "",
-      zip: local.recruitingZip || metadata.recruiting_zip || "",
-      radius: String(local.recruitingRadius || metadata.recruiting_radius || 100)
+      city: local.recruitingCity ?? metadata.recruiting_city ?? "",
+      state: local.recruitingState ?? metadata.recruiting_state ?? "",
+      zip: local.recruitingZip ?? metadata.recruiting_zip ?? "",
+      radius: Number(
+        local.recruitingRadius ?? metadata.recruiting_radius ?? 100
+      )
     };
   }
 
@@ -582,40 +809,103 @@
   function setupLocationForm() {
     const form = $("location-form");
     if (!form) return;
+  
     populateLocation();
+  
     form.addEventListener("submit", async event => {
       event.preventDefault();
+  
       const city = $("profile-city").value.trim();
-      const state = $("profile-state").value.trim();
+      const state = $("profile-state").value.trim().toUpperCase();
       const zip = $("profile-zip").value.trim();
       const radius = Number($("search-radius").value) || 100;
       const status = $("location-status");
+  
       if (!zip && !(city && state)) {
         status.textContent = "Enter a ZIP code or both city and state.";
         status.classList.add("is-error");
         return;
       }
+  
       if (zip && !/^\d{5}$/.test(zip)) {
         status.textContent = "Enter a valid 5-digit ZIP code.";
         status.classList.add("is-error");
         return;
       }
-      const profile = safeParse(localStorage.getItem("masterballerProfile"), {});
-      Object.assign(profile, { recruitingCity: city, recruitingState: state, recruitingZip: zip, recruitingRadius: radius });
-      localStorage.setItem("masterballerProfile", JSON.stringify(profile));
-      status.classList.remove("is-error");
-      status.textContent = "Location saved on this device.";
-      if (window.masterballerUser && typeof supabaseClient !== "undefined") {
-        const { error } = await supabaseClient.auth.updateUser({ data: {
-          recruiting_city: city, recruiting_state: state, recruiting_zip: zip, recruiting_radius: radius
-        }});
-        if (error) {
-          status.textContent = "Saved locally. Cloud profile update failed; please try again later.";
-          console.warn("Could not sync recruiting location:", error.message);
-        } else {
-          status.textContent = "Recruiting location saved to your player profile.";
-        }
+  
+      if (radius <= 0) {
+        status.textContent = "Choose a valid search radius.";
+        status.classList.add("is-error");
+        return;
       }
+  
+      const profile = safeParse(
+        localStorage.getItem("masterballerProfile"),
+        {}
+      );
+  
+      Object.assign(profile, {
+        recruitingCity: city,
+        recruitingState: state,
+        recruitingZip: zip,
+        recruitingRadius: radius
+      });
+  
+      localStorage.setItem(
+        "masterballerProfile",
+        JSON.stringify(profile)
+      );
+  
+      status.classList.remove("is-error");
+      status.textContent = "Saving your new location...";
+  
+      if (window.masterballerUser && typeof supabaseClient !== "undefined") {
+        const { data, error } = await supabaseClient.auth.updateUser({
+          data: {
+            recruiting_city: city,
+            recruiting_state: state,
+            recruiting_zip: zip,
+            recruiting_radius: radius
+          }
+        });
+  
+        if (error) {
+          status.textContent =
+            "Saved on this device, but cloud sync failed. Please try again.";
+          status.classList.add("is-error");
+          console.error("Location sync failed:", error);
+          return;
+        }
+  
+        window.masterballerUser = data.user;
+      }
+  
+      // Refresh the recommendations using the newly saved location.
+      locationCache.clear();
+  
+      status.textContent = "Refreshing nearby opportunities...";
+  
+      await Promise.all([
+        renderRecruiting(),
+        renderCollegeSchedules()
+      ]);
+  
+      renderScholarships();
+  
+      status.textContent =
+        "Location saved! Your opportunities and scholarships have been refreshed.";
+    });
+  }
+        window.masterballerUser = data.user;
+      }
+  
+      // Refresh all location-dependent sections.
+      renderRecruiting();
+      renderCollegeSchedules();
+      renderScholarships();
+  
+      status.textContent =
+        "Location saved! Your recommendations have been refreshed.";
     });
   }
 
