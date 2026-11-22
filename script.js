@@ -88,7 +88,8 @@ if (loginForm) {
       if (error) throw error;
 
       if (data.session) {
-        window.location.href = "dashboard.html";
+        // Existing users should go through the payment check.
+        window.location.href = "payment.html";
       }
     } catch (error) {
       message.textContent = error.message;
