@@ -328,24 +328,76 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // This is the Supabase publishable/anon key. It is intended for browser use;
-    // protect your database with Row Level Security policies.
-    const supabaseClient = window.supabase.createClient(
-      "https://thbrjtqbusxmlufbjyby.supabase.co",
-      "sb_publishable_xMZ7Mg7jnB-_jGxivC1hmw_nvlADovW"
-    );
+  
+<script>
+  const supabaseClient = window.supabase.createClient(
+    "https://thbrjtqbusxmlufbjyby.supabase.co",
+    "YOUR_EXISTING_SUPABASE_PUBLISHABLE_KEY"
+  );
 
-    window.__masterballerAuthReady = (async () => {
+  window.__masterballerAuthReady = (async () => {
+    try {
+      // 1. Check login
       const { data, error } = await supabaseClient.auth.getSession();
+
       if (error || !data.session) {
         window.location.replace("login.html");
         return false;
       }
+
+      // 2. Verify subscription on the server
+      const response = await fetch("/api/check-subscription", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${data.session.access_token}`
+        },
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error("Subscription verification failed.");
+      }
+
+      const result = await response.json();
+
+      // 3. No active subscription = payment page
+      if (result.subscribed !== true) {
+        window.location.replace("payment.html");
+        return false;
+      }
+
+      // 4. Allow verified subscribers into dashboard
       window.masterballerUser = data.session.user;
       return true;
-    })();
-  </script>
+
+    } catch (error) {
+      console.error("Dashboard access check failed:", error);
+
+      const message = document.createElement("div");
+      message.style.cssText =
+        "position:fixed;inset:0;background:#070a10;color:white;" +
+        "display:flex;flex-direction:column;align-items:center;" +
+        "justify-content:center;z-index:99999;font-family:Arial;padding:24px;text-align:center;";
+
+      const heading = document.createElement("h2");
+      heading.textContent = "Unable to verify your subscription.";
+
+      const detail = document.createElement("p");
+      detail.textContent = "Please check your connection and try again.";
+
+      const button = document.createElement("button");
+      button.textContent = "Try again";
+      button.style.cssText = "padding:12px 24px;cursor:pointer;";
+      button.onclick = () => window.location.reload();
+
+      message.append(heading, detail, button);
+      document.body.append(message);
+
+      return false;
+    }
+  })();
+</script>
+
   <script src="dashboard.js"></script>
 </body>
 </html>
