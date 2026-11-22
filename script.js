@@ -1,7 +1,8 @@
 
 const SUPABASE_URL = "https://thbrjtqbusxmlufbjyby.supabase.co";
-const SUPABASE_KEY = "sb_publishable_xMZ7Mg7jnB-_jGxivC1hmw_nvlADovW";
 
+// IMPORTANT: Replace this with your actual Supabase publishable key.
+const SUPABASE_KEY = "YOUR_EXISTING_SUPABASE_PUBLISHABLE_KEY";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -24,16 +25,40 @@ function calculateAge(dateOfBirth) {
 
   const birthdayHasNotOccurred =
     today.getMonth() < birthDate.getMonth() ||
-    (
-      today.getMonth() === birthDate.getMonth() &&
-      today.getDate() < birthDate.getDate()
-    );
+    (today.getMonth() === birthDate.getMonth() &&
+      today.getDate() < birthDate.getDate());
 
   if (birthdayHasNotOccurred) {
     age--;
   }
 
   return age;
+}
+
+// =============================
+// STRIPE CHECKOUT
+// =============================
+
+async function redirectToCheckout(session) {
+  if (!session?.access_token) {
+    throw new Error("Please log in before continuing to payment.");
+  }
+
+  const response = await fetch("/api/create-checkout-session", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`
+    }
+  });
+
+  const result = await response.json();
+
+  if (!response.ok || !result.url) {
+    throw new Error(result.error || "Unable to start checkout.");
+  }
+
+  window.location.href = result.url;
 }
 
 // =============================
@@ -67,12 +92,11 @@ if (loginForm) {
       if (error) throw error;
 
       if (data.session) {
-        window.location.href = "dashboard.html";
+        // Existing users should go through the payment check.
+        window.location.href = "payment.html";
       }
-
     } catch (error) {
       message.textContent = error.message;
-    } finally {
       button.disabled = false;
     }
   });
@@ -90,8 +114,8 @@ if (signupForm) {
   const dateOfBirthInput =
     signupForm.querySelector("#date-of-birth");
 
-  // Prevent selecting a future date.
-  dateOfBirthInput.max = new Date().toLocaleDateString("en-CA");
+  // Prevent future dates.
+  dateOfBirthInput.max = new Date().toISOString().split("T")[0];
 
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -107,20 +131,16 @@ if (signupForm) {
     const password =
       signupForm.querySelector("#password").value;
 
-    const dateOfBirth = dateOfBirthInput.value;
-    const age = calculateAge(dateOfBirth);
+    const age = calculateAge(dateOfBirthInput.value);
 
-    // Reject invalid or future birth dates.
     if (age < 0) {
       message.textContent = "Please enter a valid date of birth.";
       return;
     }
 
-    // Minimum age requirement.
     if (age < 13) {
       message.textContent =
         "You must be at least 13 years old to create a MasterBaller account.";
-
       return;
     }
 
@@ -136,23 +156,57 @@ if (signupForm) {
             full_name: fullName
           },
           emailRedirectTo:
-            `${window.location.origin}/dashboard.html`
+            `${window.location.origin}/payment.html`
         }
       });
 
       if (error) throw error;
 
       if (data.session) {
-        window.location.href = "dashboard.html";
+        message.textContent = "Account created! Taking you to payment...";
+        await redirectToCheckout(data.session);
       } else {
         message.textContent =
-          "Account created! Check your email to verify your account before logging in.";
+          "Account created! Please verify your email. After verification, you'll be taken to checkout.";
+        button.disabled = false;
       }
-
     } catch (error) {
       message.textContent = error.message;
-    } finally {
       button.disabled = false;
     }
   });
+}
+
+// =============================
+// PAYMENT PAGE
+// =============================
+
+const paymentPage = document.querySelector("#payment-page");
+
+if (paymentPage) {
+  const message = document.querySelector("#payment-message");
+
+  async function beginPayment() {
+    try {
+      message.textContent = "Checking your account...";
+
+      const { data, error } = await supabaseClient.auth.getSession();
+
+      if (error) throw error;
+
+      if (!data.session) {
+        message.textContent =
+          "Please log in to continue to your subscription.";
+        return;
+      }
+
+      message.textContent = "Taking you to secure checkout...";
+
+      await redirectToCheckout(data.session);
+    } catch (error) {
+      message.textContent = error.message;
+    }
+  }
+
+  beginPayment();
 }
