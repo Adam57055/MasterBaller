@@ -990,3 +990,190 @@
       font-size: 7px;
     }
   }
+
+  /* MASTERBALLER RESOURCE HUB */
+
+.directory-panel {
+    margin-top: 18px;
+    scroll-margin-top: 18px;
+  }
+  
+  .directory-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0 15px;
+  }
+  
+  .directory-toolbar label {
+    color: var(--muted);
+    font: 9px "DM Mono", monospace;
+  }
+  
+  .directory-toolbar select,
+  .location-field input,
+  .location-field select {
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: #0c121d;
+    color: var(--text);
+    padding: 9px 11px;
+    font: 10px "DM Mono", monospace;
+  }
+  
+  .resource-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  
+  .resource-card {
+    min-width: 0;
+    padding: 15px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #0d131e;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  
+  .resource-card:hover {
+    border-color: var(--blue);
+    transform: translateY(-2px);
+  }
+  
+  .resource-card h3 {
+    color: var(--text);
+    font: 500 13px "DM Mono", monospace;
+    line-height: 1.45;
+    margin: 7px 0 6px;
+  }
+  
+  .resource-card > p {
+    color: var(--muted);
+    font: 9px/1.65 "DM Mono", monospace;
+  }
+  
+  .resource-eyebrow {
+    color: var(--blue-light);
+    font: 8px "DM Mono", monospace;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  
+  .resource-link {
+    display: inline-flex;
+    margin-top: 10px;
+    color: #a9baff;
+    font: 9px "DM Mono", monospace;
+    text-decoration: none;
+  }
+  
+  .resource-link:hover {
+    color: var(--lime);
+  }
+  
+  .resource-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 11px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+  
+  .contact-list {
+    display: grid;
+    gap: 7px;
+    margin-top: 12px;
+  }
+  
+  .contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 10px;
+    padding-top: 7px;
+    border-top: 1px solid #202b3d;
+  }
+  
+  .contact-row strong {
+    flex-basis: 100%;
+    color: #dbe3f5;
+    font: 9px "DM Mono", monospace;
+  }
+  
+  .contact-link {
+    color: var(--muted);
+    font: 8px "DM Mono", monospace;
+    text-decoration: none;
+  }
+  
+  .resource-meta {
+    padding-left: 15px;
+    color: var(--muted);
+    font: 8px/1.7 "DM Mono", monospace;
+  }
+  
+  .resource-footnote,
+  .form-status {
+    color: var(--muted-2);
+    font: 8px/1.65 "DM Mono", monospace;
+  }
+  
+  .directory-loading {
+    grid-column: 1/-1;
+    padding: 16px;
+    border: 1px dashed var(--line);
+    border-radius: 9px;
+    color: var(--muted);
+    font: 9px/1.6 "DM Mono", monospace;
+  }
+  
+  .location-panel {
+    margin-top: 18px;
+  }
+  
+  .location-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  
+  .location-field {
+    display: grid;
+    gap: 7px;
+    color: var(--muted);
+    font: 9px "DM Mono", monospace;
+  }
+  
+  .location-field input,
+  .location-field select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .location-actions {
+    grid-column: 1/-1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  @media(max-width:760px) {
+    .resource-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .directory-toolbar {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  
+    .directory-toolbar select {
+      width: 100%;
+    }
+  
+    .location-form {
+      grid-template-columns: 1fr;
+    }
+  }

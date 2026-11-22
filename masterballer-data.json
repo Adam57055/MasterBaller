@@ -1,0 +1,129 @@
+
+{
+    "meta": {
+      "updated": "2026-11-21",
+      "note": "Starter dataset. Confirm contacts, deadlines, and schedules on official websites."
+    },
+    "collegePrograms": [
+      {
+        "school": "Furman University",
+        "city": "Greenville",
+        "state": "SC",
+        "division": "NCAA Division I",
+        "conference": "Southern Conference",
+        "teams": [
+          {
+            "gender": "men",
+            "headCoach": "Brandon Tucker",
+            "staffDirectoryUrl": "https://furmanpaladins.com/sports/mens-soccer/coaches",
+            "scheduleUrl": "https://furmanpaladins.com/sports/mens-soccer/schedule",
+            "staff": [
+              {"name": "Brandon Tucker", "title": "Head Coach"},
+              {"name": "Bret Boulware", "title": "Assistant Coach"},
+              {"name": "Camilo Rodriguez", "title": "Assistant Coach"}
+            ]
+          },
+          {
+            "gender": "women",
+            "headCoach": "Andrew Burr",
+            "staffDirectoryUrl": "https://furmanpaladins.com/sports/womens-soccer/coaches",
+            "scheduleUrl": "https://furmanpaladins.com/sports/womens-soccer/schedule",
+            "staff": [
+              {"name": "Andrew Burr", "title": "Head Coach"},
+              {"name": "April Raymer", "title": "Assistant Coach"},
+              {"name": "Brendan Smith", "title": "Assistant Coach"}
+            ]
+          }
+        ]
+      },
+      {
+        "school": "Clemson University",
+        "city": "Clemson",
+        "state": "SC",
+        "division": "NCAA Division I",
+        "conference": "ACC",
+        "teams": [
+          {
+            "gender": "men",
+            "headCoach": "Mike Noonan",
+            "staffDirectoryUrl": "https://clemsontigers.com/sports/mens-soccer/coaches/",
+            "scheduleUrl": "https://clemsontigers.com/sports/mens-soccer/schedule/",
+            "staff": [
+              {"name": "Mike Noonan", "title": "Head Coach"},
+              {"name": "Phil Jones", "title": "Assistant Coach", "email": "msoccer@clemson.edu", "phone": "864-656-5504"}
+            ]
+          },
+          {
+            "gender": "women",
+            "headCoach": "Eddie Radwanski",
+            "staffDirectoryUrl": "https://clemsontigers.com/sports/womens-soccer/coaches/",
+            "scheduleUrl": "https://clemsontigers.com/sports/womens-soccer/schedule/",
+            "staff": [
+              {"name": "Eddie Radwanski", "title": "Head Coach", "email": "eradwan@clemson.edu", "phone": "864-656-1944"},
+              {"name": "Jeff Robbins", "title": "Assistant Coach", "email": "jeferyr@clemson.edu"},
+              {"name": "Siri Mullinix", "title": "Assistant Coach", "email": "sirim@clemson.edu"},
+              {"name": "Maryanne Kilgore", "title": "Staff", "email": "kilgor4@clemson.edu"}
+            ]
+          }
+        ]
+      }
+    ],
+    "popularClubs": [
+      {"name": "Real Madrid", "league": "La Liga", "country": "Spain", "officialUrl": "https://www.realmadrid.com/en-US"},
+      {"name": "FC Barcelona", "league": "La Liga", "country": "Spain", "officialUrl": "https://www.fcbarcelona.com/en/"},
+      {"name": "Manchester United", "league": "Premier League", "country": "England", "officialUrl": "https://www.manutd.com/"},
+      {"name": "Manchester City", "league": "Premier League", "country": "England", "officialUrl": "https://www.mancity.com/"},
+      {"name": "Liverpool", "league": "Premier League", "country": "England", "officialUrl": "https://www.liverpoolfc.com/"},
+      {"name": "Arsenal", "league": "Premier League", "country": "England", "officialUrl": "https://www.arsenal.com/"},
+      {"name": "Chelsea", "league": "Premier League", "country": "England", "officialUrl": "https://www.chelseafc.com/"},
+      {"name": "Paris Saint-Germain", "league": "Ligue 1", "country": "France", "officialUrl": "https://www.psg.fr/en"},
+      {"name": "Bayern Munich", "league": "Bundesliga", "country": "Germany", "officialUrl": "https://fcbayern.com/en"},
+      {"name": "Juventus", "league": "Serie A", "country": "Italy", "officialUrl": "https://www.juventus.com/en/"}
+    ],
+    "scholarshipOpportunities": [
+      {
+        "name": "Giovanni Vitrano Foundation Scholarship",
+        "amount": "Varies",
+        "status_as_of_2026_11_21": "Open — verify eligibility",
+        "deadline": "January 30, 2027",
+        "locationRestriction": "Specified Tallahassee-area Florida counties",
+        "eligibility": [
+          "Graduating class of 2027",
+          "Varsity high-school or equivalent club soccer",
+          "Minimum 3.2 GPA"
+        ],
+        "applicationUrl": "https://gvscholarship.org/scholarship"
+      },
+      {
+        "name": "Billy Goaziou Scholarship",
+        "amount": "$1,500",
+        "status_as_of_2026_11_21": "Closed",
+        "deadline": "November 13, 2026",
+        "eligibility": [
+          "Community service",
+          "Contribution to soccer"
+        ],
+        "applicationUrl": "https://www.usyouthsoccer.org/billy-goaziou-scholarship/"
+      },
+      {
+        "name": "2026 Playmakers Cup Student-Athlete Scholarship",
+        "amount": "Up to $500",
+        "status_as_of_2026_11_21": "Closed",
+        "deadline": "November 20, 2026",
+        "eligibility": [
+          "Participation in the 2026 Playmakers Cup"
+        ],
+        "applicationUrl": "https://playmakersportsfoundation.org/scholarship.html"
+      },
+      {
+        "name": "Student-Athlete Scholarship Directory",
+        "amount": "Varies",
+        "status_as_of_2026_11_21": "Directory",
+        "eligibility": [
+          "Browse individual scholarship requirements"
+        ],
+        "applicationUrl": "https://lanternscholarships.com/scholarships-for/student-athletes"
+      }
+    ]
+  }
+  
