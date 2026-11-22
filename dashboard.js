@@ -1278,116 +1278,122 @@
   // RESOURCE HUB INITIALIZATION
   // ==========================================
 
-  async function initResourceHub() {
-    setupLocationForm();
+  
+async function initResourceHub() {
+  setupLocationForm();
 
-    try {
-      const response = await fetch("/masterballer-data.json", {
-  cache: "no-store"
-});
+  try {
+    // Load the resource database.
+    const response = await fetch("/masterballer-data.json", {
+      cache: "no-store"
+    });
 
-if (!response.ok) {
-  throw new Error("Data request failed: " + response.status);
-}
+    if (!response.ok) {
+      throw new Error(
+        "Data request failed: " + response.status
+      );
+    }
 
-resourceData = await response.json();
+    // Read the JSON response only once.
+    resourceData = await response.json();
 
-console.log("MasterBaller data loaded:", resourceData);
+    if (!resourceData || typeof resourceData !== "object") {
+      throw new Error("The resource database has an invalid format.");
+    }
 
-      if (!response.ok) {
-        throw new Error(
-          "Could not load MasterBaller data (" +
-          response.status + ")"
+    console.log("MasterBaller data loaded:", resourceData);
+
+    // Restore the player's previously saved location.
+    const savedLocation = readSavedLocation();
+
+    locationCoordinates = null;
+
+    if (savedLocation.zip) {
+      try {
+        locationCoordinates = await resolvePlayerLocation(
+          savedLocation.zip
+        );
+      } catch (error) {
+        console.warn(
+          "Could not load saved recruiting location:",
+          error
         );
       }
+    }
 
-      resourceData = await response.json();
+    // Render all resource sections.
+    renderRecruiting();
+    renderCollegeSchedules();
+    renderClubs();
+    renderScholarships();
 
-      // Restore the player's previously saved location.
-      const savedLocation = readSavedLocation();
+    // Set up filters.
+    $("recruiting-gender")?.addEventListener(
+      "change",
+      renderRecruiting
+    );
 
-      locationCoordinates = null;
+    $("games-gender")?.addEventListener(
+      "change",
+      renderCollegeSchedules
+    );
 
-      if (savedLocation.zip) {
-        try {
-          locationCoordinates =
-            await resolvePlayerLocation(savedLocation.zip);
-        } catch (error) {
-          console.warn(
-            "Could not load saved recruiting location:",
-            error
-          );
-        }
-      }
+    $("club-league")?.addEventListener(
+      "change",
+      renderClubs
+    );
 
-      renderRecruiting();
-      renderCollegeSchedules();
-      renderClubs();
-      renderScholarships();
+    $("scholarship-status")?.addEventListener(
+      "change",
+      renderScholarships
+    );
 
-      $("recruiting-gender")?.addEventListener(
-        "change",
-        renderRecruiting
+    // Add available club league options.
+    const leagueSelect = $("club-league");
+
+    if (leagueSelect) {
+      const existing = new Set(
+        Array.from(leagueSelect.options).map(
+          option => option.value
+        )
       );
 
-      $("games-gender")?.addEventListener(
-        "change",
-        renderCollegeSchedules
-      );
+      [...new Set(
+        (resourceData.popularClubs || [])
+          .map(club => club.league)
+      )].sort().forEach(league => {
+        if (existing.has(league)) return;
 
-      $("club-league")?.addEventListener(
-        "change",
-        renderClubs
-      );
+        const option = document.createElement("option");
+        option.value = league;
+        option.textContent = league;
 
-      $("scholarship-status")?.addEventListener(
-        "change",
-        renderScholarships
-      );
-
-      // Add club league options.
-      const leagueSelect = $("club-league");
-
-      if (leagueSelect) {
-        const existing = new Set(
-          Array.from(leagueSelect.options).map(option => option.value)
-        );
-
-        [...new Set(
-          (resourceData.popularClubs || [])
-            .map(club => club.league)
-        )].sort().forEach(league => {
-          if (existing.has(league)) return;
-
-          const option = document.createElement("option");
-          option.value = league;
-          option.textContent = league;
-
-          leagueSelect.append(option);
-        });
-      }
-
-    } catch (error) {
-      console.error(
-        "MasterBaller resource data failed to load:",
-        error
-      );
-
-      [
-        "recruiting-results",
-        "games-results",
-        "club-results",
-        "scholarship-results"
-      ].forEach(id => {
-        const target = $(id);
-
-        if (target) {
-          target.textContent =
-            "Resource data could not be loaded. Make sure masterballer-data.json is in the same folder as dashboard.html.";
-        }
+        leagueSelect.append(option);
       });
     }
+
+  } catch (error) {
+    console.error(
+      "MasterBaller resource data failed to load:",
+      error
+    );
+
+    [
+      "recruiting-results",
+      "games-results",
+      "club-results",
+      "scholarship-results"
+    ].forEach(id => {
+      const target = $(id);
+
+      if (target) {
+        target.textContent =
+          "Data loading error: " + error.message;
+      }
+    });
   }
+}
+
 
   // ==========================================
   // MAIN DASHBOARD INITIALIZATION
