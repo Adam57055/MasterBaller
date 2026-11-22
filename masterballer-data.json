@@ -6,10 +6,13 @@
     },
     "collegePrograms": [
       {
-        "school": "Furman University",
-        "city": "Greenville",
-        "state": "SC",
-        "division": "NCAA Division I",
+        {
+  "school": "Furman University",
+  "city": "Greenville",
+  "state": "SC",
+  "latitude": 34.9249,
+        "longitude": -82.4384,
+        "division": "D1",
         "conference": "Southern Conference",
         "teams": [
           {
@@ -37,10 +40,14 @@
         ]
       },
       {
-        "school": "Clemson University",
-        "city": "Clemson",
-        "state": "SC",
-        "division": "NCAA Division I",
+        {
+  "school": "Clemson University",
+  "city": "Clemson",
+  "state": "SC",
+  "latitude": 34.6834,
+  "longitude": -82.8374,
+  "division": "D1",
+
         "conference": "ACC",
         "teams": [
           {
