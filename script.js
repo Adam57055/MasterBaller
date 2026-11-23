@@ -48,10 +48,18 @@ async function checkSubscription(session) {
     cache: "no-store"
   });
 
-  const result = await response.json();
+  let result;
+
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error("Unable to verify your subscription. Please try again.");
+  }
 
   if (!response.ok) {
-    throw new Error(result.error || "Unable to check subscription.");
+    throw new Error(
+      result.error || "Unable to check subscription."
+    );
   }
 
   return result.subscribed === true;
@@ -71,25 +79,34 @@ async function redirectToCheckout(session) {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${session.access_token}`
-    }
+    },
+    cache: "no-store"
   });
 
-  const result = await response.json();
+  let result;
+
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error("Unable to start checkout. Please try again.");
+  }
 
   if (!response.ok) {
-    throw new Error(result.error || "Unable to start checkout.");
+    throw new Error(
+      result.error || "Unable to start checkout."
+    );
   }
-  
+
   if (result.alreadySubscribed) {
-    window.location.href = "dashboard.html";
+    window.location.replace("dashboard.html");
     return;
   }
-  
+
   if (!result.url) {
-    throw new Error("Unable to start checkout.");
+    throw new Error("Checkout URL was not returned.");
   }
-  
-  window.location.href = result.url;
+
+  window.location.assign(result.url);
 }
 
 // =============================
@@ -122,12 +139,22 @@ if (loginForm) {
 
       if (error) throw error;
 
-      if (data.session) {
-        message.textContent = "Login successful. Checking your account...";
-        window.location.href = "payment.html";
+      if (!data.session) {
+        throw new Error("Login succeeded, but no session was returned.");
       }
+
+      message.textContent = "Login successful. Checking subscription...";
+
+      const subscribed = await checkSubscription(data.session);
+
+      window.location.replace(
+        subscribed ? "dashboard.html" : "payment.html"
+      );
+
     } catch (error) {
-      message.textContent = error.message;
+      message.textContent =
+        error.message || "Unable to log in. Please try again.";
+
       button.disabled = false;
     }
   });
@@ -145,7 +172,9 @@ if (signupForm) {
   const dateOfBirthInput =
     signupForm.querySelector("#date-of-birth");
 
-  dateOfBirthInput.max = new Date().toISOString().split("T")[0];
+  if (dateOfBirthInput) {
+    dateOfBirthInput.max = new Date().toISOString().split("T")[0];
+  }
 
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -160,6 +189,11 @@ if (signupForm) {
 
     const password =
       signupForm.querySelector("#password").value;
+
+    if (!dateOfBirthInput) {
+      message.textContent = "Date of birth is required.";
+      return;
+    }
 
     const age = calculateAge(dateOfBirthInput.value);
 
@@ -185,22 +219,29 @@ if (signupForm) {
           data: {
             full_name: fullName
           },
-          emailRedirectTo: `${window.location.origin}/payment.html`
+          emailRedirectTo:
+            `${window.location.origin}/payment.html`
         }
       });
 
       if (error) throw error;
 
       if (data.session) {
-        message.textContent = "Account created! Continuing...";
-        window.location.href = "payment.html";
+        message.textContent =
+          "Account created! Checking your account...";
+
+        window.location.replace("payment.html");
       } else {
         message.textContent =
           "Account created! Please verify your email. After verification, log in to continue.";
+
         button.disabled = false;
       }
+
     } catch (error) {
-      message.textContent = error.message;
+      message.textContent =
+        error.message || "Unable to create your account.";
+
       button.disabled = false;
     }
   });
@@ -219,35 +260,36 @@ if (paymentPage) {
     try {
       message.textContent = "Checking your account...";
 
-      const { data, error } = await supabaseClient.auth.getSession();
+      const { data, error } =
+        await supabaseClient.auth.getSession();
 
       if (error) throw error;
 
       if (!data.session) {
-        message.textContent =
-          "Please log in to continue to your subscription.";
-
-        window.location.href = "login.html";
+        window.location.replace("login.html");
         return;
       }
 
-      // Existing subscribers skip Checkout.
+      // Active subscribers should never be charged again.
       const subscribed = await checkSubscription(data.session);
 
       if (subscribed) {
-        message.textContent = "Subscription active! Opening your dashboard...";
-        window.location.href = "dashboard.html";
+        message.textContent =
+          "Subscription active! Opening your dashboard...";
+
+        window.location.replace("dashboard.html");
         return;
       }
 
-      // Users without an active subscription go to Stripe.
+      // Only users without an active subscription reach Checkout.
       message.textContent = "Opening secure checkout...";
 
       await redirectToCheckout(data.session);
 
     } catch (error) {
       message.textContent =
-        error.message || "Something went wrong. Please try again.";
+        error.message ||
+        "Something went wrong. Please try again.";
     }
   }
 
