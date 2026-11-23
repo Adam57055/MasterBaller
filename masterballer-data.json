@@ -2,7 +2,7 @@
 {
   "meta": {
     "updated": "2026-11-22",
-    "note": "Starter dataset. Verify all contacts, eligibility requirements, deadlines, and schedules through official sources."
+    "note": "Expanded starter dataset. Verify contacts, eligibility requirements, deadlines, and schedules through official sources. Not a complete worldwide directory."
   },
   "collegePrograms": [
     {
@@ -115,6 +115,220 @@
           ]
         }
       ]
+    },
+    {
+      "school": "Duke University",
+      "city": "Durham",
+      "state": "NC",
+      "country": "United States",
+      "latitude": 36.0014,
+      "longitude": -78.9382,
+      "division": "D1",
+      "conference": "ACC",
+      "teams": [
+        {
+          "gender": "men",
+          "headCoach": "John Kerr",
+          "staffDirectoryUrl": "https://goduke.com/sports/mens-soccer/coaches",
+          "scheduleUrl": "https://goduke.com/sports/mens-soccer/schedule",
+          "staff": [
+            {
+              "name": "John Kerr",
+              "title": "Head Coach",
+              "email": "jjk21@duke.edu",
+              "phone": "919-668-5734"
+            },
+            {
+              "name": "Michael Brady",
+              "title": "Associate Head Coach",
+              "email": "michael.brady@duke.edu"
+            },
+            {
+              "name": "Kyle Johnston",
+              "title": "Assistant Coach"
+            },
+            {
+              "name": "Tristan Wierbonski",
+              "title": "Assistant Coach"
+            }
+          ]
+        },
+        {
+          "gender": "women",
+          "headCoach": "Kieran Hall",
+          "staffDirectoryUrl": "https://goduke.com/sports/womens-soccer/coaches",
+          "scheduleUrl": "https://goduke.com/sports/womens-soccer/schedule",
+          "staff": [
+            {
+              "name": "Kieran Hall",
+              "title": "Head Coach",
+              "email": "wsoccer@duke.edu"
+            },
+            {
+              "name": "Carla Overbeck",
+              "title": "Associate Head Coach",
+              "email": "wsoccer@duke.edu"
+            },
+            {
+              "name": "Hanna Gardner",
+              "title": "Assistant Coach",
+              "email": "wsoccer@duke.edu"
+            },
+            {
+              "name": "Evan Gaffney",
+              "title": "Assistant Coach",
+              "email": "wsoccer@duke.edu"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "school": "University of North Carolina at Chapel Hill",
+      "city": "Chapel Hill",
+      "state": "NC",
+      "country": "United States",
+      "latitude": 35.9049,
+      "longitude": -79.0469,
+      "division": "D1",
+      "conference": "ACC",
+      "teams": [
+        {
+          "gender": "men",
+          "headCoach": "Carlos Somoano",
+          "staffDirectoryUrl": "https://goheels.com/sports/mens-soccer/coaches",
+          "scheduleUrl": "https://goheels.com/sports/mens-soccer/schedule",
+          "staff": [
+            {
+              "name": "Carlos Somoano",
+              "title": "Head Coach",
+              "email": "csomoano@uncaa.unc.edu",
+              "phone": "919-962-5739"
+            },
+            {
+              "name": "Michael Callahan",
+              "title": "Assistant Coach",
+              "email": "mbcallah@unc.edu"
+            },
+            {
+              "name": "Michael Harrington",
+              "title": "Assistant Coach",
+              "email": "mrharrin@live.unc.edu"
+            },
+            {
+              "name": "Jeff Negalha",
+              "title": "Assistant Coach",
+              "email": "negalha@unc.edu"
+            }
+          ]
+        },
+        {
+          "gender": "women",
+          "staffDirectoryUrl": "https://goheels.com/sports/womens-soccer/coaches",
+          "scheduleUrl": "https://goheels.com/sports/womens-soccer/schedule",
+          "staff": []
+        }
+      ]
+    },
+    {
+      "school": "University of California, Los Angeles",
+      "city": "Los Angeles",
+      "state": "CA",
+      "country": "United States",
+      "latitude": 34.0689,
+      "longitude": -118.4452,
+      "division": "D1",
+      "conference": "Big Ten",
+      "teams": [
+        {
+          "gender": "men",
+          "staffDirectoryUrl": "https://uclabruins.com/sports/mens-soccer/coaches",
+          "scheduleUrl": "https://uclabruins.com/sports/mens-soccer/schedule",
+          "staff": []
+        },
+        {
+          "gender": "women",
+          "headCoach": "Gof Boyoko",
+          "staffDirectoryUrl": "https://uclabruins.com/sports/womens-soccer/coaches",
+          "scheduleUrl": "https://uclabruins.com/sports/womens-soccer/schedule",
+          "staff": [
+            {
+              "name": "Gof Boyoko",
+              "title": "Head Coach"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "universityClubs": [
+    {
+      "id": "university-of-galway-mens-soccer",
+      "university": "University of Galway",
+      "name": "University of Galway Men's Soccer Club",
+      "country": "Ireland",
+      "countryCode": "IE",
+      "city": "Galway",
+      "gender": "men",
+      "clubType": "competitive",
+      "website": "https://sport.universityofgalway.ie/clubs/soccer",
+      "contactEmail": "menssoccer@clubs.universityofgalway.ie",
+      "latitude": 53.2707,
+      "longitude": -9.0568
+    },
+    {
+      "id": "dcu-mens-soccer",
+      "university": "Dublin City University",
+      "name": "DCU Men's Soccer Club",
+      "country": "Ireland",
+      "countryCode": "IE",
+      "city": "Dublin",
+      "gender": "men",
+      "clubType": "competitive",
+      "website": "https://www.dcu.ie/dcusport/sports-clubs",
+      "contactEmail": "soccer@dcu.ie",
+      "latitude": 53.3498,
+      "longitude": -6.2603
+    },
+    {
+      "id": "dcu-womens-soccer",
+      "university": "Dublin City University",
+      "name": "DCU Ladies Soccer Club",
+      "country": "Ireland",
+      "countryCode": "IE",
+      "city": "Dublin",
+      "gender": "women",
+      "clubType": "competitive",
+      "website": "https://www.dcu.ie/dcusport/sports-clubs",
+      "contactEmail": "soccer@dcu.ie",
+      "latitude": 53.3498,
+      "longitude": -6.2603
+    },
+    {
+      "id": "maynooth-mens-soccer",
+      "university": "Maynooth University",
+      "name": "Maynooth University Men's Soccer Club",
+      "country": "Ireland",
+      "countryCode": "IE",
+      "city": "Maynooth",
+      "gender": "men",
+      "clubType": "competitive",
+      "website": "https://www.maynoothuniversity.ie/campus-life/sports/sports-scholarships/soccer",
+      "latitude": 53.3813,
+      "longitude": -6.5918
+    },
+    {
+      "id": "maynooth-womens-soccer",
+      "university": "Maynooth University",
+      "name": "Maynooth University Women's Soccer Club",
+      "country": "Ireland",
+      "countryCode": "IE",
+      "city": "Maynooth",
+      "gender": "women",
+      "clubType": "competitive",
+      "website": "https://www.maynoothuniversity.ie/campus-life/sports/sports-scholarships/soccer",
+      "latitude": 53.3813,
+      "longitude": -6.5918
     }
   ],
   "popularClubs": [
@@ -243,5 +457,71 @@
       ],
       "applicationUrl": "https://lanternscholarships.com/scholarships-for/student-athletes"
     }
+  ],
+  "directorySources": [
+    {
+      "name": "NCAA",
+      "url": "https://www.ncaa.com/",
+      "type": "official-programs",
+      "country": "United States"
+    },
+    {
+      "name": "College Soccer USA",
+      "url": "https://soccercollegeusa.com/",
+      "type": "program-directory",
+      "country": "United States",
+      "note": "Lists NCAA men's and women's soccer programs. Confirm program details with the institution."
+    },
+    {
+      "name": "U SPORTS",
+      "url": "https://usports.ca/",
+      "type": "official-programs",
+      "country": "Canada"
+    },
+    {
+      "name": "BUCS Football",
+      "url": "https://www.bucs.org.uk/sports-page/football.html",
+      "type": "university-football",
+      "country": "United Kingdom",
+      "note": "BUCS reports more than 500 football teams across its competitions."
+    },
+    {
+      "name": "BUCS Accredited Universities",
+      "url": "https://www.bucs.org.uk/get-involved/football-development/accredited-universities.html",
+      "type": "university-clubs",
+      "country": "United Kingdom"
+    },
+    {
+      "name": "UniSport Australia",
+      "url": "https://www.unisport.com.au/sport/football/",
+      "type": "university-football",
+      "country": "Australia",
+      "note": "Runs men's and women's university football competitions."
+    },
+    {
+      "name": "University of Galway Soccer",
+      "url": "https://sport.universityofgalway.ie/clubs/soccer",
+      "type": "university-clubs",
+      "country": "Ireland"
+    },
+    {
+      "name": "Dublin City University Sports Clubs",
+      "url": "https://www.dcu.ie/dcusport/sports-clubs",
+      "type": "university-clubs",
+      "country": "Ireland"
+    },
+    {
+      "name": "Maynooth University Soccer",
+      "url": "https://www.maynoothuniversity.ie/campus-life/sports/sports-scholarships/soccer",
+      "type": "university-clubs",
+      "country": "Ireland"
+    },
+    {
+      "name": "NIRSA",
+      "url": "https://nirsa.net/",
+      "type": "university-clubs",
+      "country": "United States"
+    }
   ]
 }
+
