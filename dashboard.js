@@ -1,4 +1,3 @@
-
 (() => {
   "use strict";
 
@@ -59,6 +58,45 @@
     goalkeeping: "Goalkeeping saves",
     communication: "Useful instructions"
   };
+
+  // ==========================================
+  // LOGOUT
+  // ==========================================
+
+  function setupLogout() {
+    const button = $("logout-button");
+
+    if (!button) return;
+
+    button.addEventListener("click", async () => {
+      if (typeof supabaseClient === "undefined") {
+        alert("Unable to connect to your account. Please refresh and try again.");
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Logging out...";
+
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) {
+          throw error;
+        }
+
+        // Keep locally saved assessments and training progress.
+        window.location.replace("login.html");
+
+      } catch (error) {
+        console.error("Logout failed:", error);
+
+        button.disabled = false;
+        button.innerHTML = "<span aria-hidden=\"true\">↪</span><span>Log out</span>";
+
+        alert("Unable to log out. Please try again.");
+      }
+    });
+  }
 
   // ==========================================
   // ASSESSMENT HISTORY
@@ -683,7 +721,10 @@
         ":scope > .section-heading"
       );
 
-      if (firstHeading && !recruitingHub.querySelector("#college-programs-coming-soon")) {
+      if (
+        firstHeading &&
+        !recruitingHub.querySelector("#college-programs-coming-soon")
+      ) {
         const message = document.createElement("div");
 
         message.id = "college-programs-coming-soon";
@@ -718,8 +759,6 @@
       recruitingResults.append(message);
     }
 
-    // Hide the old D1 directory filter because the directory is
-    // temporarily unavailable.
     const recruitingGender = $("recruiting-gender");
 
     if (recruitingGender) {
@@ -727,6 +766,34 @@
 
       const label = document.querySelector(
         'label[for="recruiting-gender"]'
+      );
+
+      if (label) label.hidden = true;
+    }
+
+    // Keep college soccer schedules in Coming Soon mode.
+    const gamesResults = $("games-results");
+
+    if (gamesResults) {
+      gamesResults.replaceChildren();
+
+      const card = makeResourceCard(
+        "College Soccer Schedules",
+        "COMING SOON",
+        "We're working on bringing college soccer schedules, fixtures, and results to MasterBaller."
+      );
+
+      gamesResults.append(card);
+    }
+
+    // The old schedules filter is no longer needed.
+    const gamesGender = $("games-gender");
+
+    if (gamesGender) {
+      gamesGender.hidden = true;
+
+      const label = document.querySelector(
+        'label[for="games-gender"]'
       );
 
       if (label) label.hidden = true;
@@ -874,95 +941,9 @@
   // COLLEGE SCHEDULES
   // ==========================================
 
+  // Intentionally disabled until the schedules feature launches.
   async function renderCollegeSchedules() {
-    const target = $("games-results");
-
-    if (!target || !resourceData) return;
-
-    target.replaceChildren();
-
-    const gender = $("games-gender")?.value || "both";
-    const saved = readSavedLocation();
-    const radius = Number(saved.radius) || 100;
-
-    let playerLocation;
-
-    try {
-      playerLocation = await getPlayerLocation();
-    } catch (error) {
-      target.textContent =
-        "We couldn't locate your saved location. Check your ZIP code or city and state.";
-      return;
-    }
-
-    if (!playerLocation) {
-      target.textContent =
-        "Set your location above to see nearby college soccer schedules.";
-      return;
-    }
-
-    let count = 0;
-
-    for (const program of resourceData.collegePrograms || []) {
-      let collegeLocation;
-
-      try {
-        collegeLocation = await getCoordinates(
-          program.city,
-          program.state,
-          ""
-        );
-      } catch (error) {
-        console.warn("Could not locate:", program.school);
-        continue;
-      }
-
-      const distance = distanceInMiles(
-        playerLocation,
-        collegeLocation
-      );
-
-      if (distance > radius) continue;
-
-      const teams = (program.teams || []).filter(team =>
-        gender === "both" || team.gender === gender
-      );
-
-      for (const team of teams) {
-        count++;
-
-        const card = makeResourceCard(
-          program.school +
-            " · " +
-            (team.gender === "men" ? "Men's" : "Women's"),
-          "OFFICIAL COLLEGE SCHEDULE",
-          program.city +
-            ", " +
-            program.state +
-            " · Approximately " +
-            Math.round(distance) +
-            " miles away"
-        );
-
-        if (team.scheduleUrl) {
-          card.append(
-            makeExternalLink(
-              team.scheduleUrl,
-              "View official schedule ↗"
-            )
-          );
-        }
-
-        target.append(card);
-      }
-    }
-
-    if (!count) {
-      target.textContent =
-        "No college schedules in the current dataset were found within " +
-        radius +
-        " miles of your saved location.";
-    }
+    showComingSoonSections();
   }
 
   // ==========================================
@@ -1268,14 +1249,9 @@
       locationCache.clear();
 
       status.textContent =
-        "Refreshing nearby opportunities...";
-
-      await renderCollegeSchedules();
+        "Location saved! Your scholarship recommendations have been refreshed.";
 
       renderScholarships();
-
-      status.textContent =
-        "Location saved! Your college schedules and scholarship recommendations have been refreshed.";
     });
   }
 
@@ -1284,7 +1260,6 @@
   // ==========================================
 
   async function initResourceHub() {
-    // Display Coming Soon immediately.
     showComingSoonSections();
 
     setupLocationForm();
@@ -1307,14 +1282,6 @@
       // Keep these resource sections working.
       renderClubs();
       renderScholarships();
-
-      // College schedules remain available.
-      await renderCollegeSchedules();
-
-      $("games-gender")?.addEventListener(
-        "change",
-        renderCollegeSchedules
-      );
 
       $("club-league")?.addEventListener(
         "change",
@@ -1349,8 +1316,10 @@
       }
 
       // Reassert Coming Soon after loading resource data.
-      // The D1 directory is intentionally not rendered.
       showComingSoonSections();
+
+      // Re-render clubs after populating the league filter.
+      renderClubs();
 
     } catch (error) {
       console.error(
@@ -1358,7 +1327,7 @@
         error
       );
 
-      ["games-results", "club-results", "scholarship-results"]
+      ["club-results", "scholarship-results"]
         .forEach(id => {
           const target = $(id);
 
@@ -1385,6 +1354,8 @@
 
       if (!authenticated) return;
     }
+
+    setupLogout();
 
     const current = saveCurrentAssessment();
     const history = readHistory();
