@@ -880,6 +880,13 @@ const visible = items.filter(item => {
         window.masterballerUser = data.user;
       }
   
+      renderScholarships();
+  
+      status.textContent =
+        "Location saved! Your scholarship recommendations have been refreshed.";
+    });
+  }
+  
       // Refresh the recommendations using the newly saved location.
       locationCache.clear();
   
@@ -911,30 +918,56 @@ const visible = items.filter(item => {
 
   async function initResourceHub() {
     setupLocationForm();
+  
     try {
-      const response = await fetch(DATA_URL, { cache: "no-cache" });
-      if (!response.ok) throw new Error("Could not load MasterBaller data (" + response.status + ")");
+      const response = await fetch(DATA_URL, {
+        cache: "no-cache"
+      });
+  
+      if (!response.ok) {
+        throw new Error(
+          "Could not load MasterBaller data (" + response.status + ")"
+        );
+      }
+  
       resourceData = await response.json();
-      renderRecruiting();
-      renderCollegeSchedules();
+  
+      // Keep existing resource sections working.
       renderClubs();
       renderScholarships();
-      $("recruiting-gender")?.addEventListener("change", renderRecruiting);
-      $("games-gender")?.addEventListener("change", renderCollegeSchedules);
+  
+      // Keep club and scholarship filters working.
       $("club-league")?.addEventListener("change", renderClubs);
-      $("scholarship-status")?.addEventListener("change", renderScholarships);
+  
+      $("scholarship-status")?.addEventListener(
+        "change",
+        renderScholarships
+      );
+  
+      // Populate competition filters.
       const leagueSelect = $("club-league");
-      [...new Set((resourceData.popularClubs || []).map(club => club.league))].sort().forEach(league => {
+  
+      [
+        ...new Set(
+          (resourceData.popularClubs || []).map(club => club.league)
+        )
+      ].sort().forEach(league => {
         const option = document.createElement("option");
         option.value = league;
         option.textContent = league;
         leagueSelect?.append(option);
       });
+  
     } catch (error) {
       console.error("MasterBaller resource data failed to load:", error);
-      ["recruiting-results", "games-results", "club-results", "scholarship-results"].forEach(id => {
+  
+      ["club-results", "scholarship-results"].forEach(id => {
         const target = $(id);
-        if (target) target.textContent = "Resource data could not be loaded. Make sure masterballer-data.json is in the same folder as dashboard.html.";
+  
+        if (target) {
+          target.textContent =
+            "Resource data could not be loaded. Make sure masterballer-data.json is in the same folder as dashboard.html.";
+        }
       });
     }
   }
