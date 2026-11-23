@@ -1,4 +1,3 @@
-
 (() => {
   "use strict";
 
@@ -7,6 +6,7 @@
   const SAVED_KEY = "masterballerDashboardSaved";
   const TASK_KEY = "masterballerTrainingTasks";
   const PROFILE_KEY = "masterballerProfile";
+  const DATA_URL = "/masterballer-data.json";
 
   const $ = id => document.getElementById(id);
 
@@ -613,10 +613,52 @@
   // LOCATION AND RESOURCE DATA
   // ==========================================
 
-  const DATA_URL = "/masterballer-data.json";
-
   let resourceData = null;
   let locationCoordinates = null;
+
+  const COUNTRY_OPTIONS = [
+    ["", "Select country"],
+    ["US", "United States"],
+    ["GB", "United Kingdom"],
+    ["CA", "Canada"],
+    ["AU", "Australia"],
+    ["NZ", "New Zealand"],
+    ["IE", "Ireland"],
+    ["FR", "France"],
+    ["DE", "Germany"],
+    ["ES", "Spain"],
+    ["IT", "Italy"],
+    ["NL", "Netherlands"],
+    ["PT", "Portugal"],
+    ["BE", "Belgium"],
+    ["CH", "Switzerland"],
+    ["AT", "Austria"],
+    ["DK", "Denmark"],
+    ["SE", "Sweden"],
+    ["NO", "Norway"],
+    ["FI", "Finland"],
+    ["IS", "Iceland"],
+    ["PL", "Poland"],
+    ["CZ", "Czechia"],
+    ["GR", "Greece"],
+    ["TR", "Türkiye"],
+    ["BR", "Brazil"],
+    ["AR", "Argentina"],
+    ["MX", "Mexico"],
+    ["CO", "Colombia"],
+    ["JP", "Japan"],
+    ["KR", "South Korea"],
+    ["CN", "China"],
+    ["IN", "India"],
+    ["ZA", "South Africa"],
+    ["NG", "Nigeria"],
+    ["GH", "Ghana"],
+    ["EG", "Egypt"],
+    ["MA", "Morocco"],
+    ["SA", "Saudi Arabia"],
+    ["AE", "United Arab Emirates"],
+    ["QA", "Qatar"]
+  ];
 
   function readSavedLocation() {
     const local = safeParse(
@@ -637,6 +679,62 @@
         100
       )
     };
+  }
+
+  function getPlayerCountrySettings() {
+    const profile = safeParse(
+      localStorage.getItem(PROFILE_KEY),
+      {}
+    );
+
+    const metadata =
+      window.masterballerUser?.user_metadata || {};
+
+    return {
+      residence:
+        profile.residenceCountry ||
+        metadata.residence_country ||
+        "US",
+
+      citizenship:
+        profile.citizenshipCountry ||
+        metadata.citizenship_country ||
+        ""
+    };
+  }
+
+  async function saveCountrySettings(residence, citizenship) {
+    const profile = safeParse(
+      localStorage.getItem(PROFILE_KEY),
+      {}
+    );
+
+    profile.residenceCountry = residence;
+    profile.citizenshipCountry = citizenship;
+
+    localStorage.setItem(
+      PROFILE_KEY,
+      JSON.stringify(profile)
+    );
+
+    if (
+      window.masterballerUser &&
+      typeof supabaseClient !== "undefined"
+    ) {
+      const { error } = await supabaseClient.auth.updateUser({
+        data: {
+          residence_country: residence,
+          citizenship_country: citizenship
+        }
+      });
+
+      if (error) {
+        console.warn(
+          "Could not sync country settings:",
+          error.message
+        );
+      }
+    }
   }
 
   async function resolvePlayerLocation(zip) {
@@ -685,6 +783,11 @@
       );
   }
 
+  function getProgramCountry(program) {
+    return program.country ||
+      (program.state ? "United States" : "Unknown");
+  }
+
   function getNearbyPrograms() {
     if (!locationCoordinates || !resourceData) return [];
 
@@ -692,6 +795,9 @@
     const radius = Number(saved.radius) || 100;
 
     return (resourceData.collegePrograms || [])
+      .filter(program =>
+        getProgramCountry(program) === "United States"
+      )
       .map(program => {
         const latitude = Number(program.latitude);
         const longitude = Number(program.longitude);
@@ -724,6 +830,8 @@
     label,
     className = "resource-link"
   ) {
+    if (!url) return document.createTextNode("");
+
     const link = document.createElement("a");
 
     link.className = className;
@@ -755,8 +863,230 @@
     return card;
   }
 
+  function makeSelect(id, labelText, options, selectedValue) {
+    const wrapper = document.createElement("label");
+    wrapper.className = "global-filter";
+
+    const label = document.createElement("span");
+    label.textContent = labelText;
+
+    const select = document.createElement("select");
+    select.id = id;
+
+    options.forEach(item => {
+      const option = document.createElement("option");
+      option.value = item.value;
+      option.textContent = item.label;
+      select.append(option);
+    });
+
+    select.value = selectedValue;
+
+    wrapper.append(label, select);
+    return wrapper;
+  }
+
+  function getCountriesInDatabase() {
+    const countries = new Set();
+
+    (resourceData?.collegePrograms || []).forEach(program => {
+      countries.add(getProgramCountry(program));
+    });
+
+    return Array.from(countries).sort();
+  }
+
+  function setupGlobalResourceFilters() {
+    const programs = resourceData?.collegePrograms || [];
+    const countries = getCountriesInDatabase();
+
+    const countryOptions = [
+      { value: "all", label: "All countries" },
+      ...countries.map(country => ({
+        value: country,
+        label: country
+      }))
+    ];
+
+    const profile = safeParse(
+      localStorage.getItem(PROFILE_KEY),
+      {}
+    );
+
+    const programContainer = $("recruiting-results");
+    const gamesContainer = $("games-results");
+
+    if (programContainer && ! $("program-global-filters")) {
+      const wrapper = document.createElement("div");
+      wrapper.id = "program-global-filters";
+      wrapper.className = "global-resource-filters";
+
+      const mode = makeSelect(
+        "program-search-mode",
+        "Program search",
+        [
+          { value: "global", label: "Worldwide" },
+          { value: "local", label: "Near my U.S. location" }
+        ],
+        profile.programSearchMode || "global"
+      );
+
+      const country = makeSelect(
+        "program-country-filter",
+        "Country",
+        countryOptions,
+        profile.programCountryFilter || "all"
+      );
+
+      wrapper.append(mode, country);
+      programContainer.parentNode.insertBefore(
+        wrapper,
+        programContainer
+      );
+
+      $("program-search-mode").addEventListener("change", () => {
+        saveFilterPreference("programSearchMode", $("program-search-mode").value);
+        renderRecruiting();
+      });
+
+      $("program-country-filter").addEventListener("change", () => {
+        saveFilterPreference("programCountryFilter", $("program-country-filter").value);
+        renderRecruiting();
+      });
+    }
+
+    if (gamesContainer && !$("games-global-filters")) {
+      const wrapper = document.createElement("div");
+      wrapper.id = "games-global-filters";
+      wrapper.className = "global-resource-filters";
+
+      const mode = makeSelect(
+        "games-search-mode",
+        "Schedule search",
+        [
+          { value: "global", label: "Worldwide" },
+          { value: "local", label: "Near my U.S. location" }
+        ],
+        profile.gamesSearchMode || "global"
+      );
+
+      const country = makeSelect(
+        "games-country-filter",
+        "Country",
+        countryOptions,
+        profile.gamesCountryFilter || "all"
+      );
+
+      wrapper.append(mode, country);
+      gamesContainer.parentNode.insertBefore(
+        wrapper,
+        gamesContainer
+      );
+
+      $("games-search-mode").addEventListener("change", () => {
+        saveFilterPreference("gamesSearchMode", $("games-search-mode").value);
+        renderCollegeSchedules();
+      });
+
+      $("games-country-filter").addEventListener("change", () => {
+        saveFilterPreference("gamesCountryFilter", $("games-country-filter").value);
+        renderCollegeSchedules();
+      });
+    }
+
+    setupScholarshipCountryFilters();
+  }
+
+  function saveFilterPreference(key, value) {
+    const profile = safeParse(
+      localStorage.getItem(PROFILE_KEY),
+      {}
+    );
+
+    profile[key] = value;
+
+    localStorage.setItem(
+      PROFILE_KEY,
+      JSON.stringify(profile)
+    );
+  }
+
+  function setupScholarshipCountryFilters() {
+    const target = $("scholarship-results");
+
+    if (!target || $("scholarship-global-filters")) return;
+
+    const settings = getPlayerCountrySettings();
+
+    const wrapper = document.createElement("div");
+    wrapper.id = "scholarship-global-filters";
+    wrapper.className = "global-resource-filters";
+
+    const residence = makeSelect(
+      "scholarship-residence-country",
+      "Country of residence",
+      COUNTRY_OPTIONS.map(([value, label]) => ({
+        value,
+        label
+      })),
+      settings.residence
+    );
+
+    const citizenship = makeSelect(
+      "scholarship-citizenship-country",
+      "Citizenship",
+      COUNTRY_OPTIONS.map(([value, label]) => ({
+        value,
+        label
+      })),
+      settings.citizenship
+    );
+
+    wrapper.append(residence, citizenship);
+
+    target.parentNode.insertBefore(wrapper, target);
+
+    async function update() {
+      await saveCountrySettings(
+        $("scholarship-residence-country").value,
+        $("scholarship-citizenship-country").value
+      );
+
+      renderScholarships();
+    }
+
+    $("scholarship-residence-country").addEventListener("change", update);
+    $("scholarship-citizenship-country").addEventListener("change", update);
+  }
+
+  function getFilteredPrograms(modeId, countryId) {
+    const mode = $(modeId)?.value || "global";
+    const country = $(countryId)?.value || "all";
+
+    let programs = [];
+
+    if (mode === "local") {
+      if (!locationCoordinates) return [];
+
+      programs = getNearbyPrograms();
+    } else {
+      programs = (resourceData?.collegePrograms || []).map(program => ({
+        ...program,
+        distance: null
+      }));
+    }
+
+    if (country !== "all") {
+      programs = programs.filter(program =>
+        getProgramCountry(program) === country
+      );
+    }
+
+    return programs;
+  }
+
   // ==========================================
-  // D1 COACH DIRECTORY
+  // D1 AND INTERNATIONAL COACH DIRECTORY
   // ==========================================
 
   function renderRecruiting() {
@@ -766,14 +1096,19 @@
 
     target.replaceChildren();
 
-    if (!locationCoordinates) {
+    const gender = $("recruiting-gender")?.value || "both";
+    const mode = $("program-search-mode")?.value || "global";
+
+    if (mode === "local" && !locationCoordinates) {
       target.textContent =
-        "Enter and save your ZIP code to find nearby D1 coaches.";
+        "Enter and save your U.S. ZIP code to find nearby programs, or switch to Worldwide.";
       return;
     }
 
-    const gender = $("recruiting-gender")?.value || "both";
-    const programs = getNearbyPrograms();
+    const programs = getFilteredPrograms(
+      "program-search-mode",
+      "program-country-filter"
+    );
 
     let count = 0;
 
@@ -785,17 +1120,31 @@
         .forEach(team => {
           count++;
 
+          const country = getProgramCountry(program);
+
+          const location = [
+            program.city,
+            program.state,
+            country
+          ].filter(Boolean).join(", ");
+
+          const distanceText = Number.isFinite(program.distance)
+            ? " · " + Math.round(program.distance) + " miles away"
+            : "";
+
           const card = makeResourceCard(
             program.school + " · " +
             (team.gender === "men"
               ? "Men's Soccer"
               : "Women's Soccer"),
 
-            program.division + " · " + program.conference,
+            [
+              program.division || program.level || "College soccer",
+              program.conference
+            ].filter(Boolean).join(" · "),
 
-            program.city + ", " + program.state +
-            " · " + Math.round(program.distance) +
-            " miles away · Head coach: " +
+            location + distanceText +
+            " · Head coach: " +
             (team.headCoach || "See official staff page")
           );
 
@@ -869,22 +1218,16 @@
       const empty = document.createElement("p");
       empty.className = "directory-loading";
 
-      const hasCoordinates = (resourceData.collegePrograms || [])
-        .some(program =>
-          Number.isFinite(Number(program.latitude)) &&
-          Number.isFinite(Number(program.longitude))
-        );
-
-      empty.textContent = hasCoordinates
-        ? "No D1 programs found within your selected radius. Try expanding your search."
-        : "College location coordinates have not been added to the database yet.";
+      empty.textContent = mode === "local"
+        ? "No programs found within your selected radius. Try expanding your search or switching to Worldwide."
+        : "No programs match these filters yet. More verified international programs can be added to the database.";
 
       target.append(empty);
     }
   }
 
   // ==========================================
-  // COLLEGE SOCCER GAMES
+  // COLLEGE SOCCER SCHEDULES
   // ==========================================
 
   function renderCollegeSchedules() {
@@ -894,14 +1237,19 @@
 
     target.replaceChildren();
 
-    if (!locationCoordinates) {
+    const gender = $("games-gender")?.value || "both";
+    const mode = $("games-search-mode")?.value || "global";
+
+    if (mode === "local" && !locationCoordinates) {
       target.textContent =
-        "Save your ZIP code to find nearby college soccer schedules.";
+        "Save your U.S. ZIP code to find nearby schedules, or switch to Worldwide.";
       return;
     }
 
-    const gender = $("games-gender")?.value || "both";
-    const programs = getNearbyPrograms();
+    const programs = getFilteredPrograms(
+      "games-search-mode",
+      "games-country-filter"
+    );
 
     let count = 0;
 
@@ -913,15 +1261,25 @@
         .forEach(team => {
           count++;
 
+          const country = getProgramCountry(program);
+
+          const location = [
+            program.city,
+            program.state,
+            country
+          ].filter(Boolean).join(", ");
+
+          const distanceText = Number.isFinite(program.distance)
+            ? " · " + Math.round(program.distance) + " miles away"
+            : "";
+
           const card = makeResourceCard(
             program.school + " · " +
             (team.gender === "men" ? "Men's" : "Women's"),
 
             "OFFICIAL COLLEGE SCHEDULE",
 
-            program.city + ", " + program.state +
-            " · " + Math.round(program.distance) +
-            " miles away"
+            location + distanceText
           );
 
           if (team.scheduleUrl) {
@@ -941,7 +1299,7 @@
       const empty = document.createElement("p");
       empty.className = "directory-loading";
       empty.textContent =
-        "No college schedules found within your selected radius. Try expanding your search.";
+        "No schedules match these filters yet. Add verified programs and official schedule links to the database.";
 
       target.append(empty);
     }
@@ -997,19 +1355,153 @@
   }
 
   // ==========================================
-  // SCHOLARSHIPS
+  // SCHOLARSHIPS AND ELIGIBILITY
   // ==========================================
 
   function scholarshipCategory(item) {
     const status = String(
-      item.status_as_of_2026_11_21 || ""
+      item.status_as_of_2026_11_21 ||
+      item.status ||
+      ""
     ).toLowerCase();
 
     if (status.includes("closed")) return "closed";
     if (status.includes("open")) return "open";
     if (status.includes("directory")) return "directory";
+    if (status.includes("upcoming")) return "upcoming";
 
-    return "upcoming";
+    return "unverified";
+  }
+
+  function normalizedList(value) {
+    if (!Array.isArray(value)) return [];
+
+    return value.map(item =>
+      String(item).trim().toLowerCase()
+    );
+  }
+
+  function includesCountry(list, countryCode, countryName) {
+    const values = normalizedList(list);
+
+    if (!values.length) return true;
+
+    if (values.includes("all") || values.includes("*")) {
+      return true;
+    }
+
+    return values.includes(String(countryCode).toLowerCase()) ||
+      values.includes(String(countryName).toLowerCase());
+  }
+
+  function scholarshipMatchesApplicant(item) {
+    const settings = getPlayerCountrySettings();
+    const residence = settings.residence || "US";
+    const citizenship = settings.citizenship || "";
+
+    const residenceName =
+      COUNTRY_OPTIONS.find(item => item[0] === residence)?.[1] ||
+      residence;
+
+    const citizenshipName =
+      COUNTRY_OPTIONS.find(item => item[0] === citizenship)?.[1] ||
+      citizenship;
+
+    const eligibleCountries = item.eligibleCountries;
+    const eligibleNationalities = item.eligibleNationalities;
+    const eligibleResidencies = item.eligibleResidencies;
+
+    if (!includesCountry(
+      eligibleCountries,
+      residence,
+      residenceName
+    )) {
+      return false;
+    }
+
+    if (!includesCountry(
+      eligibleResidencies,
+      residence,
+      residenceName
+    )) {
+      return false;
+    }
+
+    if (
+      Array.isArray(eligibleNationalities) &&
+      eligibleNationalities.length
+    ) {
+      if (!citizenship) return false;
+
+      if (!includesCountry(
+        eligibleNationalities,
+        citizenship,
+        citizenshipName
+      )) {
+        return false;
+      }
+    }
+
+    const scope = String(item.scope || "").toLowerCase();
+
+    if (scope === "local" || item.locationRestriction) {
+      if (residence !== "US") return false;
+
+      const playerState =
+        locationCoordinates?.state ||
+        readSavedLocation().state;
+
+      const eligibleStates = item.eligibleStates || [];
+      const eligibleCounties = item.eligibleCounties || [];
+
+      const profile = safeParse(
+        localStorage.getItem(PROFILE_KEY),
+        {}
+      );
+
+      const playerCounty = profile.recruitingCounty || "";
+
+      if (
+        Array.isArray(eligibleStates) &&
+        eligibleStates.length &&
+        (
+          !playerState ||
+          !eligibleStates.includes(playerState)
+        )
+      ) {
+        return false;
+      }
+
+      if (item.locationRestriction && !eligibleCounties.length) {
+        return false;
+      }
+
+      if (eligibleCounties.length) {
+        return Boolean(
+          playerCounty &&
+          eligibleCounties.some(county =>
+            county.toLowerCase() === playerCounty.toLowerCase()
+          )
+        );
+      }
+    }
+
+    if (scope === "state") {
+      const playerState =
+        locationCoordinates?.state ||
+        readSavedLocation().state;
+
+      const eligibleStates = item.eligibleStates || [];
+
+      if (
+        !playerState ||
+        !eligibleStates.includes(playerState)
+      ) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   function renderScholarships() {
@@ -1022,8 +1514,6 @@
     const filter =
       $("scholarship-status")?.value || "all";
 
-    const playerState = locationCoordinates?.state;
-
     const items = resourceData.scholarshipOpportunities || [];
 
     const visible = items.filter(item => {
@@ -1031,22 +1521,15 @@
         filter === "all" ||
         scholarshipCategory(item) === filter;
 
-      const allowedStates = item.eligibleStates;
-
-      const matchesLocation =
-        !Array.isArray(allowedStates) ||
-        (
-          playerState &&
-          allowedStates.includes(playerState)
-        );
-
-      return matchesStatus && matchesLocation;
+      return matchesStatus &&
+        scholarshipMatchesApplicant(item);
     });
 
     visible.forEach(item => {
       const status =
         item.status_as_of_2026_11_21 ||
-        "Verify current status";
+        item.status ||
+        "Status not verified";
 
       const card = makeResourceCard(
         item.name,
@@ -1063,6 +1546,12 @@
         meta.append(li);
       }
 
+      if (item.hostCountry) {
+        const li = document.createElement("li");
+        li.textContent = "Host country: " + item.hostCountry;
+        meta.append(li);
+      }
+
       if (item.locationRestriction) {
         const li = document.createElement("li");
         li.textContent =
@@ -1070,11 +1559,17 @@
         meta.append(li);
       }
 
-      (item.eligibility || []).slice(0, 4).forEach(rule => {
+      (item.eligibility || []).slice(0, 5).forEach(rule => {
         const li = document.createElement("li");
         li.textContent = rule;
         meta.append(li);
       });
+
+      if (item.lastVerified) {
+        const li = document.createElement("li");
+        li.textContent = "Last verified: " + item.lastVerified;
+        meta.append(li);
+      }
 
       card.append(meta);
 
@@ -1095,7 +1590,7 @@
         title: "NCAA scholarships & financial aid",
         eyebrow: "OFFICIAL NCAA GUIDANCE",
         description:
-          "Learn how Division I, II, and III athletic aid works. Soccer awards can be partial, and coaches—not the NCAA—award school-based athletic scholarships.",
+          "Learn how U.S. Division I, II, and III athletic aid works. Rules and available aid vary by division and school.",
         url:
           "https://www.ncaa.org/student-athletes/scholarships-and-financial-aid/"
       },
@@ -1131,11 +1626,12 @@
       target.append(card);
     });
 
-    if (!visible.length && filter !== "all") {
+    if (!visible.length) {
       const empty = document.createElement("p");
       empty.className = "directory-loading";
+
       empty.textContent =
-        "No individual awards match this filter. Try the directories and NCAA guidance below.";
+        "No individual scholarships currently match your selected filters. Check the directories below or update your country and citizenship settings.";
 
       target.prepend(empty);
     }
@@ -1184,7 +1680,7 @@
 
       if (!/^\d{5}$/.test(zip)) {
         status.textContent =
-          "Enter a valid 5-digit ZIP code.";
+          "Enter a valid 5-digit U.S. ZIP code.";
 
         status.classList.add("is-error");
         return;
@@ -1249,7 +1745,6 @@
           }
         }
 
-        // Refresh every location-dependent section.
         renderRecruiting();
         renderCollegeSchedules();
         renderScholarships();
@@ -1278,122 +1773,116 @@
   // RESOURCE HUB INITIALIZATION
   // ==========================================
 
-  
-async function initResourceHub() {
-  setupLocationForm();
+  async function initResourceHub() {
+    setupLocationForm();
 
-  try {
-    // Load the resource database.
-    const response = await fetch("/masterballer-data.json", {
-      cache: "no-store"
-    });
+    try {
+      const response = await fetch(DATA_URL, {
+        cache: "no-store"
+      });
 
-    if (!response.ok) {
-      throw new Error(
-        "Data request failed: " + response.status
-      );
-    }
-
-    // Read the JSON response only once.
-    resourceData = await response.json();
-
-    if (!resourceData || typeof resourceData !== "object") {
-      throw new Error("The resource database has an invalid format.");
-    }
-
-    console.log("MasterBaller data loaded:", resourceData);
-
-    // Restore the player's previously saved location.
-    const savedLocation = readSavedLocation();
-
-    locationCoordinates = null;
-
-    if (savedLocation.zip) {
-      try {
-        locationCoordinates = await resolvePlayerLocation(
-          savedLocation.zip
-        );
-      } catch (error) {
-        console.warn(
-          "Could not load saved recruiting location:",
-          error
+      if (!response.ok) {
+        throw new Error(
+          "Data request failed: " + response.status
         );
       }
-    }
 
-    // Render all resource sections.
-    renderRecruiting();
-    renderCollegeSchedules();
-    renderClubs();
-    renderScholarships();
+      resourceData = await response.json();
 
-    // Set up filters.
-    $("recruiting-gender")?.addEventListener(
-      "change",
-      renderRecruiting
-    );
+      if (!resourceData || typeof resourceData !== "object") {
+        throw new Error("The resource database has an invalid format.");
+      }
 
-    $("games-gender")?.addEventListener(
-      "change",
-      renderCollegeSchedules
-    );
+      console.log("MasterBaller data loaded:", resourceData);
 
-    $("club-league")?.addEventListener(
-      "change",
-      renderClubs
-    );
+      const savedLocation = readSavedLocation();
 
-    $("scholarship-status")?.addEventListener(
-      "change",
-      renderScholarships
-    );
+      locationCoordinates = null;
 
-    // Add available club league options.
-    const leagueSelect = $("club-league");
+      if (savedLocation.zip) {
+        try {
+          locationCoordinates = await resolvePlayerLocation(
+            savedLocation.zip
+          );
+        } catch (error) {
+          console.warn(
+            "Could not load saved recruiting location:",
+            error
+          );
+        }
+      }
 
-    if (leagueSelect) {
-      const existing = new Set(
-        Array.from(leagueSelect.options).map(
-          option => option.value
-        )
+      setupGlobalResourceFilters();
+
+      renderRecruiting();
+      renderCollegeSchedules();
+      renderClubs();
+      renderScholarships();
+
+      $("recruiting-gender")?.addEventListener(
+        "change",
+        renderRecruiting
       );
 
-      [...new Set(
-        (resourceData.popularClubs || [])
-          .map(club => club.league)
-      )].sort().forEach(league => {
-        if (existing.has(league)) return;
+      $("games-gender")?.addEventListener(
+        "change",
+        renderCollegeSchedules
+      );
 
-        const option = document.createElement("option");
-        option.value = league;
-        option.textContent = league;
+      $("club-league")?.addEventListener(
+        "change",
+        renderClubs
+      );
 
-        leagueSelect.append(option);
+      $("scholarship-status")?.addEventListener(
+        "change",
+        renderScholarships
+      );
+
+      const leagueSelect = $("club-league");
+
+      if (leagueSelect) {
+        const existing = new Set(
+          Array.from(leagueSelect.options).map(
+            option => option.value
+          )
+        );
+
+        [...new Set(
+          (resourceData.popularClubs || [])
+            .map(club => club.league)
+        )].sort().forEach(league => {
+          if (existing.has(league)) return;
+
+          const option = document.createElement("option");
+          option.value = league;
+          option.textContent = league;
+
+          leagueSelect.append(option);
+        });
+      }
+
+    } catch (error) {
+      console.error(
+        "MasterBaller resource data failed to load:",
+        error
+      );
+
+      [
+        "recruiting-results",
+        "games-results",
+        "club-results",
+        "scholarship-results"
+      ].forEach(id => {
+        const target = $(id);
+
+        if (target) {
+          target.textContent =
+            "Data loading error: " + error.message;
+        }
       });
     }
-
-  } catch (error) {
-    console.error(
-      "MasterBaller resource data failed to load:",
-      error
-    );
-
-    [
-      "recruiting-results",
-      "games-results",
-      "club-results",
-      "scholarship-results"
-    ].forEach(id => {
-      const target = $(id);
-
-      if (target) {
-        target.textContent =
-          "Data loading error: " + error.message;
-      }
-    });
   }
-}
-
 
   // ==========================================
   // MAIN DASHBOARD INITIALIZATION
