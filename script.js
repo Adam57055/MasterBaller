@@ -32,6 +32,35 @@ function calculateAge(dateOfBirth) {
 }
 
 // =============================
+// SUBSCRIPTION CHECK
+// =============================
+
+async function checkSubscription(session) {
+  if (!session?.access_token) {
+    throw new Error("Please log in to continue.");
+  }
+
+  const response = await fetch("/api/check-subscription", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      "Cache-Control": "no-cache"
+    },
+    cache: "no-store"
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || "Unable to verify your subscription."
+    );
+  }
+
+  return result.subscribed === true;
+}
+
+// =============================
 // STRIPE CHECKOUT
 // =============================
 
@@ -50,8 +79,18 @@ async function redirectToCheckout(session) {
 
   const result = await response.json();
 
-  if (!response.ok || !result.url) {
+  if (!response.ok) {
     throw new Error(result.error || "Unable to start checkout.");
+  }
+
+  // The backend has confirmed this user already has a subscription.
+  if (result.alreadySubscribed === true) {
+    window.location.replace("/dashboard.html");
+    return;
+  }
+
+  if (!result.url) {
+    throw new Error("Stripe did not return a checkout URL.");
   }
 
   window.location.href = result.url;
@@ -88,8 +127,7 @@ if (loginForm) {
       if (error) throw error;
 
       if (data.session) {
-        // Existing users should go through the payment check.
-        window.location.href = "payment.html";
+        window.location.href = "/payment.html";
       }
     } catch (error) {
       message.textContent = error.message;
@@ -157,11 +195,11 @@ if (signupForm) {
       if (error) throw error;
 
       if (data.session) {
-        message.textContent = "Account created! Taking you to payment...";
+        message.textContent = "Account created! Checking subscription...";
         await redirectToCheckout(data.session);
       } else {
         message.textContent =
-          "Account created! Please verify your email. After verification, you'll be taken to checkout.";
+          "Account created! Please verify your email. After verification, log in to continue.";
         button.disabled = false;
       }
     } catch (error) {
@@ -191,14 +229,33 @@ if (paymentPage) {
       if (!data.session) {
         message.textContent =
           "Please log in to continue to your subscription.";
+
+        window.location.replace("/login.html");
         return;
       }
 
+      // First check whether the user has already paid.
+      message.textContent = "Verifying your subscription...";
+
+      const subscribed = await checkSubscription(data.session);
+
+      if (subscribed) {
+        message.textContent = "Subscription verified! Opening dashboard...";
+
+        window.location.replace("/dashboard.html");
+        return;
+      }
+
+      // Only users without an active subscription reach checkout.
       message.textContent = "Taking you to secure checkout...";
 
       await redirectToCheckout(data.session);
+
     } catch (error) {
-      message.textContent = error.message;
+      console.error("Payment page error:", error);
+
+      message.textContent =
+        error.message || "Unable to verify your subscription. Please try again.";
     }
   }
 
