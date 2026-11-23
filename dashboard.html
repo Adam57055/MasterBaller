@@ -9,7 +9,42 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="dashboard.css">
+
+  <style>
+    .logout-button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 10px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .logout-button:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .logout-button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .coming-soon-card {
+      margin-top: 12px;
+    }
+  </style>
 </head>
+
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
@@ -19,6 +54,7 @@
       </a>
 
       <p class="side-label">YOUR GAME</p>
+
       <nav class="side-nav" aria-label="Dashboard navigation">
         <a class="nav-link active" href="#overview">Overview</a>
         <a class="nav-link" href="#performance">My performance</a>
@@ -28,6 +64,7 @@
       </nav>
 
       <p class="side-label season-label">MY SEASON</p>
+
       <nav class="side-nav" aria-label="Season navigation">
         <a class="nav-link" href="#progress">Goals &amp; milestones</a>
         <a class="nav-link" href="#player-profile">Player profile</a>
@@ -39,6 +76,11 @@
         <p>Keep completing assessments to understand your development.</p>
         <a href="beginning.html">Complete assessment <span>↗</span></a>
       </div>
+
+      <button class="logout-button" id="logout-button" type="button">
+        <span aria-hidden="true">↪</span>
+        <span>Log out</span>
+      </button>
 
       <div class="sidebar-profile" id="player-profile">
         <div class="avatar" id="player-avatar">P</div>
@@ -57,6 +99,7 @@
           <h1>Every session. A step closer.</h1>
           <p class="subheading" id="welcome-message">Your development, measured one assessment at a time.</p>
         </div>
+
         <div class="top-actions">
           <label class="date-select-wrap" for="history-range">
             <span class="sr-only">Progress chart range</span>
@@ -66,6 +109,7 @@
               <option value="20">All saved assessments</option>
             </select>
           </label>
+
           <a class="profile-button" href="#player-profile">View profile <span>↗</span></a>
         </div>
       </header>
@@ -85,21 +129,26 @@
               <span>OVERALL PLAYER SCORE</span>
               <span class="score-pill" id="score-count">0 assessments saved</span>
             </div>
+
             <div class="score-row">
               <strong id="overall-score">—</strong>
               <span class="score-denominator">/ 100</span>
+
               <div class="score-message">
                 <h2 id="score-status">Building consistency.</h2>
                 <p id="score-caption">Average across five scored drills.</p>
               </div>
             </div>
+
             <div class="score-track" role="progressbar" aria-label="Overall drill average" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="score-progress">
               <span id="score-fill"></span>
             </div>
+
             <div class="score-foot">
               <span>ASSESSMENT SNAPSHOT</span>
               <span id="latest-date">No assessment date</span>
             </div>
+
             <p class="score-disclaimer">A simple average of five assessment drills, not a professional rating or complete measure of soccer ability.</p>
           </article>
 
@@ -111,6 +160,7 @@
               </div>
               <span class="trend-tag" id="trend-tag">TRACKING</span>
             </div>
+
             <svg id="progress-chart" class="progress-chart" viewBox="0 0 620 190" role="img" aria-label="Assessment progress chart"></svg>
             <div class="chart-axis" id="chart-axis"></div>
             <p class="chart-note" id="progress-note">Complete an assessment to begin tracking.</p>
@@ -125,6 +175,7 @@
             </div>
             <span class="section-note">SCORED OUT OF 10</span>
           </div>
+
           <div class="skill-grid" id="skill-grid"></div>
         </section>
 
@@ -137,18 +188,23 @@
               </div>
               <span class="section-note">PERSONAL FOCUS</span>
             </div>
+
             <div class="focus-card">
               <span class="eyebrow">YOUR NEXT FOCUS</span>
               <h3 id="focus-title">Training focus</h3>
               <p id="focus-description">Your training suggestion will appear here.</p>
               <span class="focus-score" id="focus-score"></span>
             </div>
+
             <div class="panel-divider"></div>
+
             <div class="training-heading">
               <h3 class="subsection-title">Your training checklist</h3>
               <span id="task-progress">0 of 3 complete</span>
             </div>
+
             <div class="task-list" id="task-list"></div>
+
             <p class="task-footnote">Training ideas are general suggestions. Adapt drills to your space, equipment, and coaching guidance.</p>
             <a href="beginning.html" class="text-link">Retake assessment ↗</a>
           </article>
@@ -161,21 +217,25 @@
               </div>
               <span class="section-note">YOUR NEXT STEPS</span>
             </div>
+
             <div class="pathway-callout">
               <span class="eyebrow">NEXT STEP</span>
               <h3>Repeat your assessment under similar conditions.</h3>
               <p>Consistent testing makes changes easier to interpret.</p>
             </div>
+
             <div class="pathway-columns">
               <div>
                 <h4>Build consistency</h4>
                 <p>Use the same surface, distance, equipment, and test instructions when possible.</p>
               </div>
+
               <div>
                 <h4>Review your report</h4>
                 <p>Use your AI coach's feedback as a guide, alongside advice from a qualified coach.</p>
               </div>
             </div>
+
             <div class="coach-report-wrap">
               <h3 class="subsection-title">Your AI coach report</h3>
               <div id="coach-report" class="coach-report">Your AI coach report will appear here after you complete the assessment.</div>
@@ -190,6 +250,7 @@
               <p>Your submitted values, shown with their original units.</p>
             </div>
           </div>
+
           <div id="measurement-list" class="measurement-list"></div>
         </section>
 
@@ -273,35 +334,42 @@
               <p>Coach and staff information from the available program dataset.</p>
             </div>
           </div>
+
           <label class="location-field" for="recruiting-gender">Team</label>
           <select id="recruiting-gender">
             <option value="both">Men's and women's</option>
             <option value="men">Men's</option>
             <option value="women">Women's</option>
           </select>
+
           <div id="recruiting-results" class="resource-grid"></div>
 
           <div class="section-heading" style="margin-top:24px">
             <div>
               <h3>College soccer schedules</h3>
-              <p>Open official college schedules for fixtures and results.</p>
+              <p>College soccer schedules are coming to MasterBaller.</p>
             </div>
           </div>
-          <label class="location-field" for="games-gender">Team</label>
-          <select id="games-gender">
-            <option value="both">Men's and women's</option>
-            <option value="men">Men's</option>
-            <option value="women">Women's</option>
-          </select>
-          <div id="games-results" class="resource-grid"></div>
+
+          <div id="games-results" class="resource-grid">
+            <article class="resource-card coming-soon-card">
+              <span class="resource-eyebrow">COMING SOON</span>
+              <h3>College Soccer Schedules</h3>
+              <p>We're working on bringing college soccer schedules, fixtures, and results to MasterBaller.</p>
+            </article>
+          </div>
 
           <div class="section-heading" style="margin-top:24px">
-            <div><h3>Popular football clubs</h3></div>
+            <div>
+              <h3>Popular football clubs</h3>
+            </div>
           </div>
+
           <label class="location-field" for="club-league">League</label>
           <select id="club-league">
             <option value="all">All leagues</option>
           </select>
+
           <div id="club-results" class="resource-grid"></div>
 
           <div class="section-heading" style="margin-top:24px">
@@ -310,6 +378,7 @@
               <p>Check each provider's official eligibility rules and deadlines.</p>
             </div>
           </div>
+
           <label class="location-field" for="scholarship-status">Status</label>
           <select id="scholarship-status">
             <option value="all">All opportunities</option>
@@ -318,6 +387,7 @@
             <option value="closed">Closed</option>
             <option value="directory">Directories</option>
           </select>
+
           <div id="scholarship-results" class="resource-grid"></div>
         </section>
 
@@ -332,8 +402,10 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
-    // This is the Supabase publishable/anon key. Protect your database with RLS policies.
+    // This is the Supabase publishable/anon key.
+    // Protect your database with correctly configured RLS policies.
     const supabaseClient = window.supabase.createClient(
       "https://thbrjtqbusxmlufbjyby.supabase.co",
       "sb_publishable_xMZ7Mg7jnB-_jGxivC1hmw_nvlADovW"
@@ -351,6 +423,7 @@
       return true;
     })();
   </script>
+
   <script src="dashboard.js"></script>
 </body>
 </html>
