@@ -199,7 +199,8 @@ if (signupForm) {
         await redirectToCheckout(data.session);
       } else {
         message.textContent =
-          "Account created! Please verify your email. After verification, log in to continue.";
+          message.textContent =
+  "Account created! Check your email for the verification link. If you don't see it, check your Spam/Junk or Promotions folder. After verifying your email, return to MasterBaller and log in to access your subscription.";
         button.disabled = false;
       }
     } catch (error) {
