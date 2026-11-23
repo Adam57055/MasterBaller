@@ -41,6 +41,7 @@ module.exports = async function handler(req, res) {
 
     // Verify that the event genuinely came from Stripe.
     const signatureParts = signatureHeader.split(",");
+
     const timestamp = signatureParts
       .find(part => part.startsWith("t="))
       ?.slice(2);
@@ -78,7 +79,9 @@ module.exports = async function handler(req, res) {
     });
 
     if (!validSignature) {
-      return res.status(400).json({ error: "Signature verification failed." });
+      return res.status(400).json({
+        error: "Signature verification failed."
+      });
     }
 
     const event = JSON.parse(rawBody.toString("utf8"));
@@ -113,7 +116,7 @@ module.exports = async function handler(req, res) {
         throw new Error("Unable to retrieve Stripe subscription.");
       }
 
-      // Use the verified account ID associated with Checkout.
+      // Associate the subscription with the verified Checkout account.
       subscription.metadata = {
         ...subscription.metadata,
         user_id:
@@ -148,9 +151,17 @@ module.exports = async function handler(req, res) {
         ? subscription.customer
         : subscription.customer?.id;
 
-    const periodEnd = subscription.current_period_end
-      ? new Date(subscription.current_period_end * 1000).toISOString()
-      : null;
+    // Support newer and older Stripe API subscription structures.
+    const periodEndTimestamp =
+      subscription.items?.data?.[0]?.current_period_end ??
+      subscription.current_period_end ??
+      null;
+
+    const periodEnd =
+      periodEndTimestamp !== null &&
+      Number.isFinite(Number(periodEndTimestamp))
+        ? new Date(Number(periodEndTimestamp) * 1000).toISOString()
+        : null;
 
     const record = {
       user_id: userId,
