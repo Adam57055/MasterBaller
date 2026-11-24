@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="dashboard.css">
 
   <style>
-    /* Keep dashboard content hidden until server verification succeeds. */
     body:not(.auth-approved) .app-shell {
       visibility: hidden;
     }
@@ -48,6 +47,50 @@
       cursor: pointer;
       font-weight: 700;
     }
+
+    /* Subscription and billing section */
+    .billing-panel {
+      margin-bottom: 24px;
+    }
+
+    .billing-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      padding-top: 12px;
+    }
+
+    .billing-plan h3 {
+      margin: 0 0 6px;
+    }
+
+    .billing-plan p {
+      margin: 0;
+      color: #999;
+      line-height: 1.6;
+    }
+
+    .billing-button {
+      min-width: 190px;
+      cursor: pointer;
+    }
+
+    .billing-button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    #billing-status {
+      margin: 14px 0 0;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    #billing-status:empty {
+      display: none;
+    }
   </style>
 </head>
 
@@ -74,6 +117,7 @@
       <nav class="side-nav" aria-label="Season navigation">
         <a class="nav-link" href="#progress">Goals &amp; milestones</a>
         <a class="nav-link" href="#player-profile">Player profile</a>
+        <a class="nav-link" href="#subscription-billing">Subscription &amp; Billing</a>
       </nav>
 
       <div class="next-chapter">
@@ -129,6 +173,35 @@
       </section>
 
       <div id="dashboard-content" hidden>
+
+        <!-- SUBSCRIPTION AND BILLING -->
+        <section class="content-panel billing-panel" id="subscription-billing">
+          <div class="section-heading">
+            <div>
+              <h2>Subscription &amp; Billing</h2>
+              <p>Manage your MasterBaller subscription and billing preferences.</p>
+            </div>
+            <span class="section-note">YOUR ACCOUNT</span>
+          </div>
+
+          <div class="billing-content">
+            <div class="billing-plan">
+              <h3>MasterBaller Pro</h3>
+              <p>Manage your subscription securely through Stripe.</p>
+            </div>
+
+            <button
+              class="primary-button billing-button"
+              type="button"
+              id="manage-subscription-button"
+            >
+              Manage Subscription ↗
+            </button>
+          </div>
+
+          <p id="billing-status" role="status" aria-live="polite"></p>
+        </section>
+
         <section class="overview-grid">
           <article class="score-panel">
             <div class="panel-heading">
@@ -298,6 +371,7 @@
                 <option value="AR">Argentina</option>
                 <option value="CL">Chile</option>
                 <option value="CO">Colombia</option>
+                <option value="JP">Japan</option>
                 <option value="KR">South Korea</option>
                 <option value="PL">Poland</option>
                 <option value="AT">Austria</option>
@@ -334,23 +408,23 @@
             </div>
           </form>
 
-        <section class="content-panel directory-panel" id="recruiting">
-          <section class="content-panel directory-panel coming-soon-panel" id="college-games">
-            <div class="section-heading">
-              <div>
-                <h2>College Games Near You</h2>
-                <p>Discover college soccer games and official team schedules.</p>
+          <section class="content-panel directory-panel" id="recruiting">
+            <section class="content-panel directory-panel coming-soon-panel" id="college-games">
+              <div class="section-heading">
+                <div>
+                  <h2>College Games Near You</h2>
+                  <p>Discover college soccer games and official team schedules.</p>
+                </div>
+                <span class="section-note">COMING SOON</span>
               </div>
-              <span class="section-note">COMING SOON</span>
-            </div>
 
-            <div class="coming-soon-message">
-              <span class="coming-soon-label">COMING SOON</span>
-              <h3>College Soccer Games</h3>
-              <p>We're working on bringing you this feature. Stay tuned!</p>
-            </div>
+              <div class="coming-soon-message">
+                <span class="coming-soon-label">COMING SOON</span>
+                <h3>College Soccer Games</h3>
+                <p>We're working on bringing you this feature. Stay tuned!</p>
+              </div>
+            </section>
           </section>
-        </section>
 
           <div class="section-heading" style="margin-top:24px">
             <div>
@@ -419,10 +493,8 @@
 
     window.masterballerSupabase = supabaseClient;
 
-    // Dashboard scripts must wait for this promise.
     window.__masterballerAuthReady = (async () => {
       try {
-        // 1. Verify that a user is logged in.
         const { data, error } =
           await supabaseClient.auth.getSession();
 
@@ -435,7 +507,6 @@
           return false;
         }
 
-        // 2. Verify the subscription on the server.
         const response = await fetch("/api/check-subscription", {
           method: "GET",
           headers: {
@@ -459,13 +530,11 @@
           );
         }
 
-        // 3. Unsubscribed users must go through payment.
         if (result.subscribed !== true) {
           window.location.replace("payment.html");
           return false;
         }
 
-        // 4. Only verified subscribers can see the dashboard.
         window.masterballerUser = data.session.user;
         document.body.classList.add("auth-approved");
 
@@ -499,6 +568,61 @@
       "retry-subscription-check"
     ).addEventListener("click", () => {
       window.location.reload();
+    });
+  </script>
+
+  <!-- Stripe Customer Portal button -->
+  <script>
+    const manageSubscriptionButton = document.getElementById(
+      "manage-subscription-button"
+    );
+
+    const billingStatus = document.getElementById("billing-status");
+
+    manageSubscriptionButton.addEventListener("click", async () => {
+      manageSubscriptionButton.disabled = true;
+      manageSubscriptionButton.textContent = "Opening billing...";
+      billingStatus.textContent = "";
+
+      try {
+        const { data, error } =
+          await supabaseClient.auth.getSession();
+
+        if (error || !data.session) {
+          throw new Error("Please log in again.");
+        }
+
+        const response = await fetch(
+          "/api/create-customer-portal",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${data.session.access_token}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.url) {
+          throw new Error(
+            result.error || "Unable to open billing settings."
+          );
+        }
+
+        window.location.href = result.url;
+
+      } catch (error) {
+        console.error("Billing portal error:", error);
+
+        billingStatus.textContent =
+          error.message || "Something went wrong.";
+
+        manageSubscriptionButton.disabled = false;
+        manageSubscriptionButton.textContent =
+          "Manage Subscription ↗";
+      }
     });
   </script>
 
