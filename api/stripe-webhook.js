@@ -142,7 +142,7 @@ module.exports = async function handler(req, res) {
         );
       }
 
-      // Associate the subscription with the correct user.
+      // Associate subscription with the correct user.
       subscription.metadata = {
         ...subscription.metadata,
         user_id:
@@ -152,7 +152,7 @@ module.exports = async function handler(req, res) {
       };
     }
 
-    // Handle subscription changes and cancellation.
+    // Handle subscription updates and cancellations.
     if (
       event.type === "customer.subscription.updated" ||
       event.type === "customer.subscription.deleted"
@@ -198,11 +198,28 @@ module.exports = async function handler(req, res) {
           ).toISOString()
         : null;
 
-    // A scheduled cancellation is NOT an immediate cancellation.
+    // Recognize both Stripe cancellation scheduling methods.
+    const cancelAtTimestamp =
+      subscription.cancel_at ?? null;
+
+    const hasFutureCancelAt =
+      cancelAtTimestamp !== null &&
+      Number.isFinite(Number(cancelAtTimestamp)) &&
+      Number(cancelAtTimestamp) * 1000 > Date.now();
+
+    const cancelAtMatchesPeriodEnd =
+      hasFutureCancelAt &&
+      periodEndTimestamp !== null &&
+      Number(cancelAtTimestamp) ===
+        Number(periodEndTimestamp);
+
     const cancelAtPeriodEnd =
       event.type === "customer.subscription.deleted"
         ? false
-        : subscription.cancel_at_period_end === true;
+        : (
+            subscription.cancel_at_period_end === true ||
+            cancelAtMatchesPeriodEnd
+          );
 
     const record = {
       user_id: userId,
