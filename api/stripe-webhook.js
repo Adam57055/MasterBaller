@@ -1,9 +1,17 @@
 
-const crypto = require("crypto");
+import { createHmac, timingSafeEqual } from "node:crypto";
 
-module.exports = async function handler(req, res) {
+export const config = {
+  api: {
+    bodyParser: false
+  }
+};
+
+export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      error: "Method not allowed"
+    });
   }
 
   const {
@@ -25,12 +33,14 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Read the unmodified request body.
+    // 1. Read the original, unmodified request body.
     const chunks = [];
 
     for await (const chunk of req) {
       chunks.push(
-        Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
+        Buffer.isBuffer(chunk)
+          ? chunk
+          : Buffer.from(chunk)
       );
     }
 
@@ -43,7 +53,7 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // Verify Stripe signature.
+    // 2. Verify Stripe's signature.
     const signatureParts = signatureHeader.split(",");
 
     const timestamp = signatureParts
@@ -54,7 +64,11 @@ module.exports = async function handler(req, res) {
       .filter(part => part.startsWith("v1="))
       .map(part => part.slice(3));
 
-    if (!timestamp || signatures.length === 0) {
+    if (
+      !timestamp ||
+      !/^\d+$/.test(timestamp) ||
+      signatures.length === 0
+    ) {
       return res.status(400).json({
         error: "Invalid Stripe signature."
       });
@@ -70,12 +84,11 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    const signedPayload =
-      `${timestamp}.${rawBody.toString("utf8")}`;
-
-    const expectedSignature = crypto
-      .createHmac("sha256", STRIPE_WEBHOOK_SECRET)
-      .update(signedPayload)
+    const expectedSignature = createHmac(
+      "sha256",
+      STRIPE_WEBHOOK_SECRET
+    )
+      .update(`${timestamp}.${rawBody.toString("utf8")}`)
       .digest();
 
     const validSignature = signatures.some(signature => {
@@ -90,7 +103,7 @@ module.exports = async function handler(req, res) {
 
       return (
         receivedSignature.length === expectedSignature.length &&
-        crypto.timingSafeEqual(
+        timingSafeEqual(
           receivedSignature,
           expectedSignature
         )
@@ -103,11 +116,12 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    // 3. Parse the verified event.
     const event = JSON.parse(rawBody.toString("utf8"));
 
     let subscription = null;
 
-    // Handle successful Checkout.
+    // 4. Handle successful subscription checkout.
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
 
@@ -126,7 +140,7 @@ module.exports = async function handler(req, res) {
           : session.subscription.id;
 
       const stripeResponse = await fetch(
-        `https://api.stripe.com/v1/subscriptions/${subscriptionId}`,
+        `https://api.stripe.com/v1/subscriptions/${encodeURIComponent(subscriptionId)}`,
         {
           headers: {
             Authorization: `Bearer ${STRIPE_SECRET_KEY}`
@@ -134,25 +148,40 @@ module.exports = async function handler(req, res) {
         }
       );
 
-      subscription = await stripeResponse.json();
+      const stripeData = await stripeResponse.json();
 
       if (!stripeResponse.ok) {
+        console.error(
+          "Stripe subscription retrieval failed:",
+          stripeData
+        );
+
         throw new Error(
           "Unable to retrieve Stripe subscription."
         );
       }
 
-      // Associate subscription with the correct user.
+      subscription = stripeData;
+
+      // Associate the subscription with the correct user.
+      const userId =
+        subscription.metadata?.user_id ||
+        session.metadata?.user_id ||
+        session.client_reference_id;
+
+      if (!userId) {
+        throw new Error(
+          "Checkout session is missing user metadata."
+        );
+      }
+
+      // 5. Handle subscription updates and cancellations.
       subscription.metadata = {
         ...subscription.metadata,
-        user_id:
-          subscription.metadata?.user_id ||
-          session.metadata?.user_id ||
-          session.client_reference_id
+        user_id: userId
       };
     }
 
-    // Handle subscription updates and cancellations.
     if (
       event.type === "customer.subscription.updated" ||
       event.type === "customer.subscription.deleted"
@@ -160,13 +189,14 @@ module.exports = async function handler(req, res) {
       subscription = event.data.object;
     }
 
-    // Ignore unrelated events.
+    // Ignore events that do not affect subscriptions.
     if (!subscription) {
       return res.status(200).json({
         received: true
       });
     }
 
+    // 6. Identify the Supabase user.
     const userId = subscription.metadata?.user_id;
 
     if (!userId) {
@@ -184,7 +214,13 @@ module.exports = async function handler(req, res) {
         ? subscription.customer
         : subscription.customer?.id;
 
-    // Support newer and older Stripe API structures.
+    if (!customerId || !subscription.id) {
+      throw new Error(
+        "Subscription is missing its customer or subscription ID."
+      );
+    }
+
+    // 7. Calculate subscription period information.
     const periodEndTimestamp =
       subscription.items?.data?.[0]?.current_period_end ??
       subscription.current_period_end ??
@@ -198,7 +234,6 @@ module.exports = async function handler(req, res) {
           ).toISOString()
         : null;
 
-    // Recognize both Stripe cancellation scheduling methods.
     const cancelAtTimestamp =
       subscription.cancel_at ?? null;
 
@@ -221,9 +256,10 @@ module.exports = async function handler(req, res) {
             cancelAtMatchesPeriodEnd
           );
 
+    // 8. Prepare the Supabase subscription record.
     const record = {
       user_id: userId,
-      stripe_customer_id: customerId || null,
+      stripe_customer_id: customerId,
       stripe_subscription_id: subscription.id,
 
       status:
@@ -236,7 +272,7 @@ module.exports = async function handler(req, res) {
       updated_at: new Date().toISOString()
     };
 
-    // Update Supabase.
+    // 9. Save the new Live Stripe information in Supabase.
     const databaseResponse = await fetch(
       `${SUPABASE_URL}/rest/v1/user_subscriptions?on_conflict=user_id`,
       {
@@ -264,6 +300,12 @@ module.exports = async function handler(req, res) {
       );
     }
 
+    console.log(
+      "Subscription successfully synchronized:",
+      event.type,
+      subscription.id
+    );
+
     return res.status(200).json({
       received: true
     });
@@ -271,18 +313,11 @@ module.exports = async function handler(req, res) {
   } catch (error) {
     console.error(
       "Stripe webhook error:",
-      error
+      error.message
     );
 
     return res.status(500).json({
       error: "Webhook processing failed."
     });
   }
-};
-
-// Disable automatic body parsing.
-module.exports.config = {
-  api: {
-    bodyParser: false
-  }
-};
+}
