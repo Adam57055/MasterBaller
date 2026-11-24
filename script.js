@@ -233,7 +233,8 @@ if (signupForm) {
         window.location.replace("payment.html");
       } else {
         message.textContent =
-          "Account created! Please verify your email. After verification, log in to continue.";
+          message.textContent =
+  "Account created! Please verify your email. Check your inbox and spam folder for the verification email. After verification, log in to continue.";
 
         button.disabled = false;
       }
