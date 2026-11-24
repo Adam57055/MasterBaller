@@ -708,7 +708,6 @@
 
     return card;
   }
-  const locationCache = new Map();
 
   async function getCoordinates(city, state, zip) {
     const cacheKey = zip
