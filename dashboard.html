@@ -60,19 +60,17 @@
       </a>
 
       <p class="side-label">YOUR GAME</p>
+
       <nav class="side-nav" aria-label="Dashboard navigation">
         <a class="nav-link active" href="#overview">Overview</a>
         <a class="nav-link" href="#performance">My performance</a>
         <a class="nav-link" href="#training">Training plan</a>
         <a class="nav-link" href="#pathway">D1 pathway</a>
-        <a class="nav-link" href="#recruiting">D1 recruiting</a>
-        <a class="nav-link" href="#college-games">College games</a>
-        <a class="nav-link" href="#clubs">Popular clubs</a>
-        <a class="nav-link" href="#scholarships">Scholarships</a>
-        <a class="nav-link" href="volunteer.html">Volunteer opportunities</a>
+        <a class="nav-link" href="volunteer.html">Opportunities</a>
       </nav>
 
       <p class="side-label season-label">MY SEASON</p>
+
       <nav class="side-nav" aria-label="Season navigation">
         <a class="nav-link" href="#progress">Goals &amp; milestones</a>
         <a class="nav-link" href="#player-profile">Player profile</a>
@@ -84,6 +82,11 @@
         <p>Keep completing assessments to understand your development.</p>
         <a href="beginning.html">Complete assessment <span>↗</span></a>
       </div>
+
+      <button class="logout-button" id="logout-button" type="button">
+        <span aria-hidden="true">↪</span>
+        <span>Log out</span>
+      </button>
 
       <div class="sidebar-profile" id="player-profile">
         <div class="avatar" id="player-avatar">P</div>
@@ -102,6 +105,7 @@
           <h1>Every session. A step closer.</h1>
           <p class="subheading" id="welcome-message">Your development, measured one assessment at a time.</p>
         </div>
+
         <div class="top-actions">
           <label class="date-select-wrap" for="history-range">
             <span class="sr-only">Progress chart range</span>
@@ -111,6 +115,7 @@
               <option value="20">All saved assessments</option>
             </select>
           </label>
+
           <a class="profile-button" href="#player-profile">View profile <span>↗</span></a>
         </div>
       </header>
@@ -124,27 +129,32 @@
       </section>
 
       <div id="dashboard-content" hidden>
-        <section class="overview-grid" id="assessment-overview">
+        <section class="overview-grid">
           <article class="score-panel">
             <div class="panel-heading">
               <span>OVERALL PLAYER SCORE</span>
               <span class="score-pill" id="score-count">0 assessments saved</span>
             </div>
+
             <div class="score-row">
               <strong id="overall-score">—</strong>
               <span class="score-denominator">/ 100</span>
+
               <div class="score-message">
                 <h2 id="score-status">Building consistency.</h2>
                 <p id="score-caption">Average across five scored drills.</p>
               </div>
             </div>
+
             <div class="score-track" role="progressbar" aria-label="Overall drill average" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="score-progress">
               <span id="score-fill"></span>
             </div>
+
             <div class="score-foot">
               <span>ASSESSMENT SNAPSHOT</span>
               <span id="latest-date">No assessment date</span>
             </div>
+
             <p class="score-disclaimer">A simple average of five assessment drills, not a professional rating or complete measure of soccer ability.</p>
           </article>
 
@@ -156,6 +166,7 @@
               </div>
               <span class="trend-tag" id="trend-tag">TRACKING</span>
             </div>
+
             <svg id="progress-chart" class="progress-chart" viewBox="0 0 620 190" role="img" aria-label="Assessment progress chart"></svg>
             <div class="chart-axis" id="chart-axis"></div>
             <p class="chart-note" id="progress-note">Complete an assessment to begin tracking.</p>
@@ -170,10 +181,11 @@
             </div>
             <span class="section-note">SCORED OUT OF 10</span>
           </div>
+
           <div class="skill-grid" id="skill-grid"></div>
         </section>
 
-        <section class="lower-grid" id="training-pathway-grid">
+        <section class="lower-grid">
           <article class="content-panel" id="training">
             <div class="section-heading">
               <div>
@@ -182,18 +194,23 @@
               </div>
               <span class="section-note">PERSONAL FOCUS</span>
             </div>
+
             <div class="focus-card">
               <span class="eyebrow">YOUR NEXT FOCUS</span>
               <h3 id="focus-title">Training focus</h3>
               <p id="focus-description">Your training suggestion will appear here.</p>
               <span class="focus-score" id="focus-score"></span>
             </div>
+
             <div class="panel-divider"></div>
+
             <div class="training-heading">
               <h3 class="subsection-title">Your training checklist</h3>
               <span id="task-progress">0 of 3 complete</span>
             </div>
+
             <div class="task-list" id="task-list"></div>
+
             <p class="task-footnote">Training ideas are general suggestions. Adapt drills to your space, equipment, and coaching guidance.</p>
             <a href="beginning.html" class="text-link">Retake assessment ↗</a>
           </article>
@@ -206,21 +223,25 @@
               </div>
               <span class="section-note">YOUR NEXT STEPS</span>
             </div>
+
             <div class="pathway-callout">
               <span class="eyebrow">NEXT STEP</span>
               <h3>Repeat your assessment under similar conditions.</h3>
               <p>Consistent testing makes changes easier to interpret.</p>
             </div>
+
             <div class="pathway-columns">
               <div>
                 <h4>Build consistency</h4>
                 <p>Use the same surface, distance, equipment, and test instructions when possible.</p>
               </div>
+
               <div>
                 <h4>Review your report</h4>
                 <p>Use your AI coach's feedback as a guide, alongside advice from a qualified coach.</p>
               </div>
             </div>
+
             <div class="coach-report-wrap">
               <h3 class="subsection-title">Your AI coach report</h3>
               <div id="coach-report" class="coach-report">Your AI coach report will appear here after you complete the assessment.</div>
@@ -235,27 +256,66 @@
               <p>Your submitted values, shown with their original units.</p>
             </div>
           </div>
+
           <div id="measurement-list" class="measurement-list"></div>
         </section>
 
-        <section class="content-panel location-panel" id="location-settings">
+        <section class="content-panel" id="recruiting-hub" style="margin-top: 24px;">
           <div class="section-heading">
             <div>
-              <h2>Your recruiting location</h2>
-              <p>Set the area used to find nearby college programs and matches.</p>
+              <h2>College recruiting &amp; opportunities</h2>
+              <p>Save a location to find college programs and schedules within your chosen radius.</p>
             </div>
-            <span class="section-note">PLAYER PROFILE</span>
           </div>
+
           <form id="location-form" class="location-form">
+            <label class="location-field" for="profile-country">Country
+              <select id="profile-country" name="country">
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+                <option value="GB">United Kingdom</option>
+                <option value="IE">Ireland</option>
+                <option value="AU">Australia</option>
+                <option value="NZ">New Zealand</option>
+                <option value="IN">India</option>
+                <option value="DE">Germany</option>
+                <option value="FR">France</option>
+                <option value="ES">Spain</option>
+                <option value="IT">Italy</option>
+                <option value="NL">Netherlands</option>
+                <option value="PT">Portugal</option>
+                <option value="BR">Brazil</option>
+                <option value="MX">Mexico</option>
+                <option value="JP">Japan</option>
+                <option value="SE">Sweden</option>
+                <option value="NO">Norway</option>
+                <option value="DK">Denmark</option>
+                <option value="BE">Belgium</option>
+                <option value="CH">Switzerland</option>
+                <option value="ZA">South Africa</option>
+                <option value="GH">Ghana</option>
+                <option value="NG">Nigeria</option>
+                <option value="AR">Argentina</option>
+                <option value="CL">Chile</option>
+                <option value="CO">Colombia</option>
+                <option value="KR">South Korea</option>
+                <option value="PL">Poland</option>
+                <option value="AT">Austria</option>
+              </select>
+            </label>
+
             <label class="location-field" for="profile-city">City
               <input id="profile-city" name="city" type="text" maxlength="80" placeholder="e.g. Greenville">
             </label>
-            <label class="location-field" for="profile-state">State
-              <input id="profile-state" name="state" type="text" maxlength="40" placeholder="e.g. South Carolina">
+
+            <label class="location-field" for="profile-state">State / region
+              <input id="profile-state" name="state" type="text" maxlength="80" placeholder="e.g. South Carolina">
             </label>
-            <label class="location-field" for="profile-zip">ZIP code
-              <input id="profile-zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{5}" maxlength="5" placeholder="5-digit ZIP">
+
+            <label class="location-field" for="profile-zip">Postal code
+              <input id="profile-zip" name="zip" type="text" maxlength="12" placeholder="ZIP / postal code">
             </label>
+
             <label class="location-field" for="search-radius">Search radius
               <select id="search-radius" name="radius">
                 <option value="100">100 miles (default)</option>
@@ -263,14 +323,16 @@
                 <option value="200">200 miles</option>
                 <option value="300">300 miles</option>
                 <option value="500">500 miles</option>
+                <option value="1000">1,000 miles</option>
+                <option value="3000">3,000 miles</option>
               </select>
             </label>
+
             <div class="location-actions">
               <button class="primary-button" type="submit" id="save-location">Save location</button>
-              <span id="location-status" class="form-status" role="status" aria-live="polite">Your location is only used to personalize nearby college results.</span>
+              <span id="location-status" class="form-status" role="status" aria-live="polite">Your location is used to calculate nearby college results.</span>
             </div>
           </form>
-        </section>
 
         <section class="content-panel directory-panel" id="recruiting">
           <section class="content-panel directory-panel coming-soon-panel" id="college-games">
@@ -290,47 +352,36 @@
           </section>
         </section>
 
-        <section class="content-panel directory-panel" id="clubs">
-          <div class="section-heading">
+          <div class="section-heading" style="margin-top:24px">
             <div>
-              <h2>Popular Football Clubs</h2>
-              <p>Follow major clubs, explore their official sites, and keep up with the game.</p>
+              <h3>Popular football clubs</h3>
             </div>
-            <span class="section-note">GLOBAL FOOTBALL</span>
           </div>
-          <div class="directory-toolbar">
-            <label for="club-league">Competition</label>
-            <select id="club-league">
-              <option value="all">All competitions</option>
-            </select>
-          </div>
-          <div class="resource-grid club-grid" id="club-results" aria-live="polite">
-            <p class="directory-loading">Loading clubs…</p>
-          </div>
-        </section>
 
-        <section class="content-panel directory-panel" id="scholarships">
-          <div class="section-heading">
+          <label class="location-field" for="club-league">League</label>
+          <select id="club-league">
+            <option value="all">All leagues</option>
+          </select>
+
+          <div id="club-results" class="resource-grid"></div>
+
+          <div class="section-heading" style="margin-top:24px">
             <div>
-              <h2>Scholarships &amp; Financial Aid</h2>
-              <p>Explore soccer-related awards and broader student-athlete funding resources.</p>
+              <h3>Scholarships &amp; financial aid</h3>
+              <p>Check each provider's official eligibility rules and deadlines.</p>
             </div>
-            <span class="section-note">FUND YOUR FUTURE</span>
           </div>
-          <div class="directory-toolbar">
-            <label for="scholarship-status">Opportunity status</label>
-            <select id="scholarship-status">
-              <option value="all">All opportunities</option>
-              <option value="open">Open now</option>
-              <option value="upcoming">Upcoming / recurring</option>
-              <option value="closed">Recently closed</option>
-              <option value="directory">Directories &amp; guidance</option>
-            </select>
-          </div>
-          <div class="resource-grid" id="scholarship-results" aria-live="polite">
-            <p class="directory-loading">Loading scholarship resources…</p>
-          </div>
-          <p class="resource-footnote">Always verify eligibility, award amounts, and deadlines with the scholarship provider. Some awards have geographic or school-specific restrictions.</p>
+
+          <label class="location-field" for="scholarship-status">Status</label>
+          <select id="scholarship-status">
+            <option value="all">All opportunities</option>
+            <option value="open">Open</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="closed">Closed</option>
+            <option value="directory">Directories</option>
+          </select>
+
+          <div id="scholarship-results" class="resource-grid"></div>
         </section>
 
         <p class="disclaimer">MasterBaller uses submitted measurements. Results depend on testing conditions and do not determine team selection, recruiting status, or eligibility.</p>

@@ -1,9 +1,7 @@
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "Method not allowed"
-    });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
@@ -11,14 +9,16 @@ export default async function handler(req, res) {
       STRIPE_SECRET_KEY,
       STRIPE_PRICE_ID,
       SUPABASE_URL,
-      SUPABASE_ANON_KEY
+      SUPABASE_ANON_KEY,
+      SUPABASE_SERVICE_ROLE_KEY
     } = process.env;
 
     if (
       !STRIPE_SECRET_KEY ||
       !STRIPE_PRICE_ID ||
       !SUPABASE_URL ||
-      !SUPABASE_ANON_KEY
+      !SUPABASE_ANON_KEY ||
+      !SUPABASE_SERVICE_ROLE_KEY
     ) {
       throw new Error("Missing server environment variables.");
     }
@@ -58,6 +58,40 @@ export default async function handler(req, res) {
       });
     }
 
+    // Check subscription status on the server.
+    const subscriptionResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/user_subscriptions?select=status,current_period_end&user_id=eq.${encodeURIComponent(user.id)}`,
+      {
+        headers: {
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
+        },
+        cache: "no-store"
+      }
+    );
+
+    if (!subscriptionResponse.ok) {
+      throw new Error("Unable to verify subscription status.");
+    }
+
+    const rows = await subscriptionResponse.json();
+    const subscription = rows[0];
+
+    const validStatus =
+      subscription &&
+      ["active", "trialing"].includes(subscription.status);
+
+    const validPeriod =
+      subscription?.current_period_end &&
+      new Date(subscription.current_period_end).getTime() > Date.now();
+
+    // Do not create another subscription for an active subscriber.
+    if (validStatus && validPeriod) {
+      return res.status(200).json({
+        alreadySubscribed: true
+      });
+    }
+
     // Create Stripe Checkout session.
     const stripeParams = new URLSearchParams();
 
@@ -65,19 +99,20 @@ export default async function handler(req, res) {
     stripeParams.append("line_items[0][price]", STRIPE_PRICE_ID);
     stripeParams.append("line_items[0][quantity]", "1");
 
+
     stripeParams.append(
       "success_url",
       "https://masterballer.vercel.app/dashboard.html?checkout=success"
     );
 
+    // Replace this with the actual free-report page URL.
     stripeParams.append(
       "cancel_url",
-      "https://masterballer.vercel.app/dashboard.html?checkout=cancelled"
+      "https://masterballer.vercel.app/results.html"
     );
 
     stripeParams.append("customer_email", user.email);
     stripeParams.append("client_reference_id", user.id);
-
     stripeParams.append("metadata[user_id]", user.id);
     stripeParams.append(
       "subscription_data[metadata][user_id]",
