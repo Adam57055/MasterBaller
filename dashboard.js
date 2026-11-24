@@ -708,191 +708,48 @@
 
     return card;
   }
-
-  // ==========================================
-  // COMING SOON SECTIONS
-  // ==========================================
-
-  function showComingSoonSections() {
-    const recruitingHub = $("recruiting-hub");
-
-    if (recruitingHub) {
-      const firstHeading = recruitingHub.querySelector(
-        ":scope > .section-heading"
-      );
-
-      if (
-        firstHeading &&
-        !recruitingHub.querySelector("#college-programs-coming-soon")
-      ) {
-        const message = document.createElement("div");
-
-        message.id = "college-programs-coming-soon";
-        message.className = "resource-card";
-
-        const eyebrow = document.createElement("span");
-        eyebrow.className = "resource-eyebrow";
-        eyebrow.textContent = "COLLEGE RECRUITING PROGRAMS";
-
-        const heading = document.createElement("h3");
-        heading.textContent = "Coming Soon";
-
-        const description = document.createElement("p");
-        description.textContent =
-          "College recruiting program recommendations are coming soon to MasterBaller.";
-
-        message.append(eyebrow, heading, description);
-
-        firstHeading.insertAdjacentElement("afterend", message);
-      }
-    }
-
-    const recruitingResults = $("recruiting-results");
-
-    if (recruitingResults) {
-      recruitingResults.replaceChildren();
-
-      const message = document.createElement("p");
-      message.className = "directory-loading";
-      message.textContent = "Coming Soon";
-
-      recruitingResults.append(message);
-    }
-
-    const recruitingGender = $("recruiting-gender");
-
-    if (recruitingGender) {
-      recruitingGender.hidden = true;
-
-      const label = document.querySelector(
-        'label[for="recruiting-gender"]'
-      );
-
-      if (label) label.hidden = true;
-    }
-
-    // Keep college soccer schedules in Coming Soon mode.
-    const gamesResults = $("games-results");
-
-    if (gamesResults) {
-      gamesResults.replaceChildren();
-
-      const card = makeResourceCard(
-        "College Soccer Schedules",
-        "COMING SOON",
-        "We're working on bringing college soccer schedules, fixtures, and results to MasterBaller."
-      );
-
-      gamesResults.append(card);
-    }
-
-    // The old schedules filter is no longer needed.
-    const gamesGender = $("games-gender");
-
-    if (gamesGender) {
-      gamesGender.hidden = true;
-
-      const label = document.querySelector(
-        'label[for="games-gender"]'
-      );
-
-      if (label) label.hidden = true;
-    }
-  }
-
-  // ==========================================
-  // LOCATION
-  // ==========================================
-
-  function readSavedLocation() {
-    const local = safeParse(
-      localStorage.getItem(PROFILE_KEY),
-      {}
-    );
-
-    const metadata =
-      window.masterballerUser?.user_metadata || {};
-
-    return {
-      city: local.recruitingCity ?? metadata.recruiting_city ?? "",
-      state: local.recruitingState ?? metadata.recruiting_state ?? "",
-      zip: local.recruitingZip ?? metadata.recruiting_zip ?? "",
-      radius: Number(
-        local.recruitingRadius ??
-        metadata.recruiting_radius ??
-        100
-      )
-    };
-  }
-
-  function populateLocation() {
-    const saved = readSavedLocation();
-
-    if ($("profile-city")) {
-      $("profile-city").value = saved.city;
-    }
-
-    if ($("profile-state")) {
-      $("profile-state").value = saved.state;
-    }
-
-    if ($("profile-zip")) {
-      $("profile-zip").value = saved.zip;
-    }
-
-    if ($("search-radius")) {
-      $("search-radius").value = saved.radius;
-    }
-  }
+  const locationCache = new Map();
 
   async function getCoordinates(city, state, zip) {
     const cacheKey = zip
-      ? "zip:" + zip
-      : "city:" + city.toLowerCase() + ":" + state.toLowerCase();
-
+      ? `zip:${zip}`
+      : `city:${city.toLowerCase()}:${state.toLowerCase()}`;
+  
     if (locationCache.has(cacheKey)) {
       return locationCache.get(cacheKey);
     }
-
+  
     const request = (async () => {
       let url;
-
+  
       if (zip) {
-        url =
-          "https://api.zippopotam.us/us/" +
-          encodeURIComponent(zip);
+        url = `https://api.zippopotam.us/us/${encodeURIComponent(zip)}`;
       } else {
-        url =
-          "https://api.zippopotam.us/us/" +
-          encodeURIComponent(state) +
-          "/" +
-          encodeURIComponent(city);
+        url = `https://api.zippopotam.us/us/${encodeURIComponent(state)}/${encodeURIComponent(city)}`;
       }
-
+  
       const response = await fetch(url);
-
+  
       if (!response.ok) {
-        throw new Error(
-          "Could not find coordinates for this location."
-        );
+        throw new Error("Could not find coordinates for this location.");
       }
-
+  
       const data = await response.json();
       const place = data.places?.[0];
-
+  
       if (!place) {
         throw new Error("No location results found.");
       }
-
+  
       return {
         latitude: Number(place.latitude),
         longitude: Number(place.longitude),
         state: place["state abbreviation"] || state
       };
     })();
-
+  
     locationCache.set(cacheKey, request);
-
+  
     try {
       return await request;
     } catch (error) {
@@ -900,56 +757,236 @@
       throw error;
     }
   }
-
+  
   function distanceInMiles(a, b) {
     const radians = degrees => degrees * Math.PI / 180;
     const earthRadius = 3958.8;
-
+  
     const dLat = radians(b.latitude - a.latitude);
     const dLon = radians(b.longitude - a.longitude);
-
+  
     const lat1 = radians(a.latitude);
     const lat2 = radians(b.latitude);
-
+  
     const value =
       Math.sin(dLat / 2) ** 2 +
-      Math.cos(lat1) *
-      Math.cos(lat2) *
+      Math.cos(lat1) * Math.cos(lat2) *
       Math.sin(dLon / 2) ** 2;
-
+  
     return earthRadius * 2 * Math.atan2(
       Math.sqrt(value),
       Math.sqrt(1 - value)
     );
   }
-
+  
   async function getPlayerLocation() {
     const saved = readSavedLocation();
-
+  
     if (!saved.zip && !(saved.city && saved.state)) {
       return null;
     }
-
-    return getCoordinates(
-      saved.city,
-      saved.state,
-      saved.zip
-    );
+  
+    return getCoordinates(saved.city, saved.state, saved.zip);
+  }
+  async function renderRecruiting() {
+    const target = $("recruiting-results");
+    if (!target || !resourceData) return;
+  
+    target.replaceChildren();
+  
+    const gender = $("recruiting-gender")?.value || "both";
+    const saved = readSavedLocation();
+    const radius = Number(saved.radius) || 100;
+  
+    let playerLocation;
+  
+    try {
+      playerLocation = await getPlayerLocation();
+    } catch (error) {
+      target.textContent = "We couldn't locate your saved location. Check your ZIP code or city and state.";
+      return;
+    }
+  
+    if (!playerLocation) {
+      target.textContent = "Set your city and state or ZIP code above to see nearby college programs.";
+      return;
+    }
+  
+    let count = 0;
+  
+    for (const program of resourceData.collegePrograms || []) {
+      let collegeLocation;
+  
+      try {
+        collegeLocation = await getCoordinates(
+          program.city,
+          program.state,
+          ""
+        );
+      } catch (error) {
+        console.warn("Could not locate:", program.school);
+        continue;
+      }
+  
+      const distance = distanceInMiles(playerLocation, collegeLocation);
+  
+      if (distance > radius) continue;
+  
+      const teams = (program.teams || []).filter(team =>
+        gender === "both" || team.gender === gender
+      );
+  
+      for (const team of teams) {
+        count++;
+  
+        const card = makeResourceCard(
+          program.school + " · " +
+            (team.gender === "men" ? "Men's Soccer" : "Women's Soccer"),
+          program.division + " · " + program.conference,
+          program.city + ", " + program.state +
+            " · Approximately " + Math.round(distance) + " miles away" +
+            " · Head coach: " + (team.headCoach || "See official staff page")
+        );
+  
+        const contacts = document.createElement("div");
+        contacts.className = "contact-list";
+  
+        (team.staff || []).forEach(person => {
+          const row = document.createElement("div");
+          row.className = "contact-row";
+  
+          const personName = document.createElement("strong");
+          personName.textContent =
+            person.name + (person.title ? " · " + person.title : "");
+  
+          row.append(personName);
+  
+          if (person.email) {
+            row.append(
+              makeExternalLink(
+                "mailto:" + person.email,
+                person.email,
+                "contact-link"
+              )
+            );
+          }
+  
+          if (person.phone) {
+            row.append(
+              makeExternalLink(
+                "tel:" + person.phone.replace(/[^0-9+]/g, ""),
+                person.phone,
+                "contact-link"
+              )
+            );
+          }
+  
+          contacts.append(row);
+        });
+  
+        card.append(contacts);
+  
+        const actions = document.createElement("div");
+        actions.className = "resource-actions";
+  
+        if (team.staffDirectoryUrl) {
+          actions.append(
+            makeExternalLink(team.staffDirectoryUrl, "Official coaching staff ↗")
+          );
+        }
+  
+        if (team.scheduleUrl) {
+          actions.append(
+            makeExternalLink(team.scheduleUrl, "Team schedule ↗")
+          );
+        }
+  
+        card.append(actions);
+        target.append(card);
+      }
+    }
+  
+    if (!count) {
+      target.textContent =
+        "No college programs in the current dataset were found within " +
+        radius + " miles of your saved location.";
+    }
   }
 
-  // ==========================================
-  // COLLEGE SCHEDULES
-  // ==========================================
-
-  // Intentionally disabled until the schedules feature launches.
   async function renderCollegeSchedules() {
-    showComingSoonSections();
+    const target = $("games-results");
+    if (!target || !resourceData) return;
+  
+    target.replaceChildren();
+  
+    const gender = $("games-gender")?.value || "both";
+    const saved = readSavedLocation();
+    const radius = Number(saved.radius) || 100;
+  
+    let playerLocation;
+  
+    try {
+      playerLocation = await getPlayerLocation();
+    } catch (error) {
+      target.textContent = "We couldn't locate your saved location. Check your ZIP code or city and state.";
+      return;
+    }
+  
+    if (!playerLocation) {
+      target.textContent = "Set your location above to see nearby college soccer schedules.";
+      return;
+    }
+  
+    let count = 0;
+  
+    for (const program of resourceData.collegePrograms || []) {
+      let collegeLocation;
+  
+      try {
+        collegeLocation = await getCoordinates(
+          program.city,
+          program.state,
+          ""
+        );
+      } catch (error) {
+        continue;
+      }
+  
+      const distance = distanceInMiles(playerLocation, collegeLocation);
+  
+      if (distance > radius) continue;
+  
+      const teams = (program.teams || []).filter(team =>
+        gender === "both" || team.gender === gender
+      );
+  
+      for (const team of teams) {
+        count++;
+  
+        const card = makeResourceCard(
+          program.school + " · " +
+            (team.gender === "men" ? "Men's" : "Women's"),
+          "OFFICIAL COLLEGE SCHEDULE",
+          program.city + ", " + program.state +
+            " · Approximately " + Math.round(distance) + " miles away"
+        );
+  
+        if (team.scheduleUrl) {
+          card.append(
+            makeExternalLink(team.scheduleUrl, "View official schedule ↗")
+          );
+        }
+  
+        target.append(card);
+      }
+    }
+  
+    if (!count) {
+      target.textContent =
+        "No college schedules in the current dataset were found within " +
+        radius + " miles of your saved location.";
+    }
   }
-
-  // ==========================================
-  // POPULAR CLUBS
-  // ==========================================
-
   function renderClubs() {
     const target = $("club-results");
 
@@ -1017,41 +1054,26 @@
     if (!target || !resourceData) return;
 
     target.replaceChildren();
-
-    const filter =
-      $("scholarship-status")?.value || "all";
-
-    const items =
-      resourceData.scholarshipOpportunities || [];
-
+    const filter = $("scholarship-status")?.value || "all";
+    const items = resourceData.scholarshipOpportunities || [];
     const saved = readSavedLocation();
+const playerState = String(saved.state || "").trim().toUpperCase();
 
-    const playerState = String(saved.state || "")
-      .trim()
-      .toUpperCase();
+const visible = items.filter(item => {
+  const matchesStatus =
+    filter === "all" || scholarshipCategory(item) === filter;
 
-    const visible = items.filter(item => {
-      const matchesStatus =
-        filter === "all" ||
-        scholarshipCategory(item) === filter;
+  if (!matchesStatus) return false;
 
-      if (!matchesStatus) return false;
+  const restriction = String(item.locationRestriction || "").toLowerCase();
 
-      const restriction = String(
-        item.locationRestriction || ""
-      ).toLowerCase();
+  // The current starter dataset has a Florida-specific restriction.
+  if (restriction.includes("florida") && playerState && playerState !== "FL") {
+    return false;
+  }
 
-      if (
-        restriction.includes("florida") &&
-        playerState &&
-        playerState !== "FL"
-      ) {
-        return false;
-      }
-
-      return true;
-    });
-
+  return true;
+});
     visible.forEach(item => {
       const status =
         item.status_as_of_2026_11_21 ||
@@ -1156,26 +1178,44 @@
     }
   }
 
-  // ==========================================
-  // LOCATION FORM
-  // ==========================================
+  function readSavedLocation() {
+    const local = safeParse(localStorage.getItem("masterballerProfile"), {});
+    const metadata = window.masterballerUser?.user_metadata || {};
+  
+    return {
+      city: local.recruitingCity ?? metadata.recruiting_city ?? "",
+      state: local.recruitingState ?? metadata.recruiting_state ?? "",
+      zip: local.recruitingZip ?? metadata.recruiting_zip ?? "",
+      radius: Number(
+        local.recruitingRadius ?? metadata.recruiting_radius ?? 100
+      )
+    };
+  }
+
+  function populateLocation() {
+    const saved = readSavedLocation();
+    if ($("profile-city")) $("profile-city").value = saved.city;
+    if ($("profile-state")) $("profile-state").value = saved.state;
+    if ($("profile-zip")) $("profile-zip").value = saved.zip;
+    if ($("search-radius")) $("search-radius").value = saved.radius;
+  }
 
   function setupLocationForm() {
     const form = $("location-form");
 
     if (!form) return;
-
+  
     populateLocation();
-
+  
     form.addEventListener("submit", async event => {
       event.preventDefault();
-
+  
       const city = $("profile-city").value.trim();
       const state = $("profile-state").value.trim().toUpperCase();
       const zip = $("profile-zip").value.trim();
       const radius = Number($("search-radius").value) || 100;
       const status = $("location-status");
-
+  
       if (!zip && !(city && state)) {
         status.textContent =
           "Enter a ZIP code or both city and state.";
@@ -1183,7 +1223,7 @@
         status.classList.add("is-error");
         return;
       }
-
+  
       if (zip && !/^\d{5}$/.test(zip)) {
         status.textContent =
           "Enter a valid 5-digit ZIP code.";
@@ -1191,67 +1231,87 @@
         status.classList.add("is-error");
         return;
       }
-
+  
       if (radius <= 0) {
-        status.textContent =
-          "Choose a valid search radius.";
-
+        status.textContent = "Choose a valid search radius.";
         status.classList.add("is-error");
         return;
       }
-
+  
       const profile = safeParse(
-        localStorage.getItem(PROFILE_KEY),
+        localStorage.getItem("masterballerProfile"),
         {}
       );
-
+  
       Object.assign(profile, {
         recruitingCity: city,
         recruitingState: state,
         recruitingZip: zip,
         recruitingRadius: radius
       });
-
+  
       localStorage.setItem(
-        PROFILE_KEY,
+        "masterballerProfile",
         JSON.stringify(profile)
       );
-
+  
       status.classList.remove("is-error");
       status.textContent = "Saving your new location...";
-
-      if (
-        window.masterballerUser &&
-        typeof supabaseClient !== "undefined"
-      ) {
-        const { data, error } =
-          await supabaseClient.auth.updateUser({
-            data: {
-              recruiting_city: city,
-              recruiting_state: state,
-              recruiting_zip: zip,
-              recruiting_radius: radius
-            }
-          });
-
+  
+      if (window.masterballerUser && typeof supabaseClient !== "undefined") {
+        const { data, error } = await supabaseClient.auth.updateUser({
+          data: {
+            recruiting_city: city,
+            recruiting_state: state,
+            recruiting_zip: zip,
+            recruiting_radius: radius
+          }
+        });
+  
         if (error) {
           status.textContent =
             "Saved on this device, but cloud sync failed. Please try again.";
-
           status.classList.add("is-error");
           console.error("Location sync failed:", error);
           return;
         }
-
+  
         window.masterballerUser = data.user;
       }
-
-      locationCache.clear();
-
+  
+      renderScholarships();
+  
       status.textContent =
         "Location saved! Your scholarship recommendations have been refreshed.";
-
+    });
+  }
+  
+      // Refresh the recommendations using the newly saved location.
+      locationCache.clear();
+  
+      status.textContent = "Refreshing nearby opportunities...";
+  
+      await Promise.all([
+        renderRecruiting(),
+        renderCollegeSchedules()
+      ]);
+  
       renderScholarships();
+  
+      status.textContent =
+        "Location saved! Your opportunities and scholarships have been refreshed.";
+    });
+  }
+        window.masterballerUser = data.user;
+      }
+  
+      // Refresh all location-dependent sections.
+      renderRecruiting();
+      renderCollegeSchedules();
+      renderScholarships();
+  
+      status.textContent =
+        "Location saved! Your recommendations have been refreshed.";
     });
   }
 
@@ -1263,83 +1323,57 @@
     showComingSoonSections();
 
     setupLocationForm();
-
+  
     try {
       const response = await fetch(DATA_URL, {
         cache: "no-cache"
       });
-
+  
       if (!response.ok) {
         throw new Error(
-          "Could not load MasterBaller data (" +
-          response.status +
-          ")"
+          "Could not load MasterBaller data (" + response.status + ")"
         );
       }
-
+  
       resourceData = await response.json();
-
-      // Keep these resource sections working.
+  
+      // Keep existing resource sections working.
       renderClubs();
       renderScholarships();
-
-      $("club-league")?.addEventListener(
-        "change",
-        renderClubs
-      );
-
+  
+      // Keep club and scholarship filters working.
+      $("club-league")?.addEventListener("change", renderClubs);
+  
       $("scholarship-status")?.addEventListener(
         "change",
         renderScholarships
       );
-
-      // Populate the club competition filter.
+  
+      // Populate competition filters.
       const leagueSelect = $("club-league");
-
-      if (leagueSelect) {
-        const leagues = [
-          ...new Set(
-            (resourceData.popularClubs || [])
-              .map(club => club.league)
-              .filter(Boolean)
-          )
-        ].sort();
-
-        leagues.forEach(league => {
-          const option = document.createElement("option");
-
-          option.value = league;
-          option.textContent = league;
-
-          leagueSelect.append(option);
-        });
-      }
-
-      // Reassert Coming Soon after loading resource data.
-      showComingSoonSections();
-
-      // Re-render clubs after populating the league filter.
-      renderClubs();
-
+  
+      [
+        ...new Set(
+          (resourceData.popularClubs || []).map(club => club.league)
+        )
+      ].sort().forEach(league => {
+        const option = document.createElement("option");
+        option.value = league;
+        option.textContent = league;
+        leagueSelect?.append(option);
+      });
+  
     } catch (error) {
-      console.error(
-        "MasterBaller resource data failed to load:",
-        error
-      );
-
-      ["club-results", "scholarship-results"]
-        .forEach(id => {
-          const target = $(id);
-
-          if (target) {
-            target.textContent =
-              "Resource data could not be loaded. Make sure masterballer-data.json is in the same folder as dashboard.html.";
-          }
-        });
-
-      // Keep both Coming Soon sections visible even if
-      // the resource data file fails to load.
-      showComingSoonSections();
+      console.error("MasterBaller resource data failed to load:", error);
+  
+      ["club-results", "scholarship-results"].forEach(id => {
+        const target = $(id);
+  
+        if (target) {
+          target.textContent =
+            "Resource data could not be loaded. Make sure masterballer-data.json is in the same folder as dashboard.html.";
+        }
+      });
     }
   }
 

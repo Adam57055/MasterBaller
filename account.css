@@ -39,6 +39,7 @@ body {
 
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .auth-panel {
@@ -375,3 +376,28 @@ a:not(.switch-option) {
   }
 
 }
+
+/* Center the payment page */
+.page-shell {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    box-sizing: border-box;
+  }
+  
+  .auth-panel {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .subscription-details,
+  #payment-page,
+  .intro {
+    width: 100%;
+    text-align: center;
+  }

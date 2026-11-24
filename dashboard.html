@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,42 +6,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#070a10">
   <title>MasterBaller | Player Dashboard</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="dashboard.css">
 
   <style>
-    .logout-button {
-      display: flex;
+    /* Keep dashboard content hidden until server verification succeeds. */
+    body:not(.auth-approved) .app-shell {
+      visibility: hidden;
+    }
+
+    #subscription-verification-error {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: none;
       align-items: center;
-      gap: 10px;
-      width: 100%;
-      padding: 12px 15px;
-      margin-bottom: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 10px;
-      background: transparent;
-      color: inherit;
-      font: inherit;
-      font-weight: 600;
-      text-align: left;
+      justify-content: center;
+      padding: 24px;
+      background: #070a10;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    #subscription-verification-error.visible {
+      display: flex;
+    }
+
+    #subscription-verification-error .error-content {
+      max-width: 440px;
+    }
+
+    #subscription-verification-error button {
+      margin-top: 14px;
+      padding: 12px 22px;
+      border: 0;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s ease, border-color 0.2s ease;
-    }
-
-    .logout-button:hover {
-      background: rgba(255, 255, 255, 0.07);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    .logout-button:disabled {
-      opacity: 0.6;
-      cursor: wait;
-    }
-
-    .coming-soon-card {
-      margin-top: 12px;
+      font-weight: 700;
     }
   </style>
 </head>
@@ -328,36 +334,23 @@
             </div>
           </form>
 
-          <div class="section-heading" style="margin-top:24px">
-            <div>
-              <h3>Division I recruiting directory</h3>
-              <p>Coach and staff information from the available program dataset.</p>
+        <section class="content-panel directory-panel" id="recruiting">
+          <section class="content-panel directory-panel coming-soon-panel" id="college-games">
+            <div class="section-heading">
+              <div>
+                <h2>College Games Near You</h2>
+                <p>Discover college soccer games and official team schedules.</p>
+              </div>
+              <span class="section-note">COMING SOON</span>
             </div>
-          </div>
 
-          <label class="location-field" for="recruiting-gender">Team</label>
-          <select id="recruiting-gender">
-            <option value="both">Men's and women's</option>
-            <option value="men">Men's</option>
-            <option value="women">Women's</option>
-          </select>
-
-          <div id="recruiting-results" class="resource-grid"></div>
-
-          <div class="section-heading" style="margin-top:24px">
-            <div>
-              <h3>College soccer schedules</h3>
-              <p>College soccer schedules are coming to MasterBaller.</p>
+            <div class="coming-soon-message">
+              <span class="coming-soon-label">COMING SOON</span>
+              <h3>College Soccer Games</h3>
+              <p>We're working on bringing you this feature. Stay tuned!</p>
             </div>
-          </div>
-
-          <div id="games-results" class="resource-grid">
-            <article class="resource-card coming-soon-card">
-              <span class="resource-eyebrow">COMING SOON</span>
-              <h3>College Soccer Schedules</h3>
-              <p>We're working on bringing college soccer schedules, fixtures, and results to MasterBaller.</p>
-            </article>
-          </div>
+          </section>
+        </section>
 
           <div class="section-heading" style="margin-top:24px">
             <div>
@@ -401,27 +394,112 @@
     </main>
   </div>
 
+  <div id="subscription-verification-error" role="alert" aria-live="assertive">
+    <div class="error-content">
+      <h2>Unable to verify your subscription</h2>
+      <p id="subscription-error-message">
+        Please check your connection and try again.
+      </p>
+      <button type="button" id="retry-subscription-check">
+        Try again
+      </button>
+      <p>
+        <a href="login.html" style="color:#ffffff;">Return to login</a>
+      </p>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // This is the Supabase publishable/anon key.
-    // Protect your database with correctly configured RLS policies.
     const supabaseClient = window.supabase.createClient(
       "https://thbrjtqbusxmlufbjyby.supabase.co",
       "sb_publishable_xMZ7Mg7jnB-_jGxivC1hmw_nvlADovW"
     );
 
-    window.__masterballerAuthReady = (async () => {
-      const { data, error } = await supabaseClient.auth.getSession();
+    window.masterballerSupabase = supabaseClient;
 
-      if (error || !data.session) {
-        window.location.replace("login.html");
+    // Dashboard scripts must wait for this promise.
+    window.__masterballerAuthReady = (async () => {
+      try {
+        // 1. Verify that a user is logged in.
+        const { data, error } =
+          await supabaseClient.auth.getSession();
+
+        if (error) {
+          throw error;
+        }
+
+        if (!data.session) {
+          window.location.replace("login.html");
+          return false;
+        }
+
+        // 2. Verify the subscription on the server.
+        const response = await fetch("/api/check-subscription", {
+          method: "GET",
+          headers: {
+            Authorization:
+              `Bearer ${data.session.access_token}`
+          },
+          cache: "no-store"
+        });
+
+        let result;
+
+        try {
+          result = await response.json();
+        } catch {
+          throw new Error("The server returned an invalid response.");
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            result.error || "Subscription verification failed."
+          );
+        }
+
+        // 3. Unsubscribed users must go through payment.
+        if (result.subscribed !== true) {
+          window.location.replace("payment.html");
+          return false;
+        }
+
+        // 4. Only verified subscribers can see the dashboard.
+        window.masterballerUser = data.session.user;
+        document.body.classList.add("auth-approved");
+
+        return true;
+
+      } catch (error) {
+        console.error(
+          "Dashboard access check failed:",
+          error
+        );
+
+        const errorPanel = document.getElementById(
+          "subscription-verification-error"
+        );
+
+        const errorMessage = document.getElementById(
+          "subscription-error-message"
+        );
+
+        errorMessage.textContent =
+          error.message ||
+          "Please check your connection and try again.";
+
+        errorPanel.classList.add("visible");
+
         return false;
       }
-
-      window.masterballerUser = data.session.user;
-      return true;
     })();
+
+    document.getElementById(
+      "retry-subscription-check"
+    ).addEventListener("click", () => {
+      window.location.reload();
+    });
   </script>
 
   <script src="dashboard.js"></script>
