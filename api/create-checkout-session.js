@@ -1,7 +1,9 @@
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      error: "Method not allowed"
+    });
   }
 
   try {
@@ -20,7 +22,9 @@ export default async function handler(req, res) {
       !SUPABASE_ANON_KEY ||
       !SUPABASE_SERVICE_ROLE_KEY
     ) {
-      throw new Error("Missing server environment variables.");
+      return res.status(500).json({
+        error: "Missing server environment variables."
+      });
     }
 
     // Verify the logged-in Supabase user.
@@ -40,7 +44,8 @@ export default async function handler(req, res) {
         headers: {
           apikey: SUPABASE_ANON_KEY,
           Authorization: `Bearer ${accessToken}`
-        }
+        },
+        cache: "no-store"
       }
     );
 
@@ -58,9 +63,9 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check subscription status on the server.
+    // Check the user's existing subscription.
     const subscriptionResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/user_subscriptions?select=status,current_period_end&user_id=eq.${encodeURIComponent(user.id)}`,
+      `${SUPABASE_URL}/rest/v1/user_subscriptions?select=status,stripe_subscription_id&user_id=eq.${encodeURIComponent(user.id)}`,
       {
         headers: {
           apikey: SUPABASE_SERVICE_ROLE_KEY,
@@ -71,49 +76,68 @@ export default async function handler(req, res) {
     );
 
     if (!subscriptionResponse.ok) {
-      throw new Error("Unable to verify subscription status.");
+      throw new Error(
+        "Unable to verify subscription status."
+      );
     }
 
     const rows = await subscriptionResponse.json();
     const subscription = rows[0];
 
-    const validStatus =
+    // Prevent duplicate active subscriptions.
+    if (
       subscription &&
-      ["active", "trialing"].includes(subscription.status);
-
-    const validPeriod =
-      subscription?.current_period_end &&
-      new Date(subscription.current_period_end).getTime() > Date.now();
-
-    // Do not create another subscription for an active subscriber.
-    if (validStatus && validPeriod) {
+      ["active", "trialing"].includes(subscription.status)
+    ) {
       return res.status(200).json({
         alreadySubscribed: true
       });
     }
 
-    // Create Stripe Checkout session.
+    // Create a new Stripe Checkout session.
+    // Do not reuse old Sandbox customer IDs.
     const stripeParams = new URLSearchParams();
 
     stripeParams.append("mode", "subscription");
-    stripeParams.append("line_items[0][price]", STRIPE_PRICE_ID);
-    stripeParams.append("line_items[0][quantity]", "1");
 
+    stripeParams.append(
+      "line_items[0][price]",
+      STRIPE_PRICE_ID
+    );
+
+    stripeParams.append(
+      "line_items[0][quantity]",
+      "1"
+    );
 
     stripeParams.append(
       "success_url",
       "https://masterballer.vercel.app/dashboard.html?checkout=success"
     );
 
-    // Replace this with the actual free-report page URL.
     stripeParams.append(
       "cancel_url",
       "https://masterballer.vercel.app/results.html"
     );
 
-    stripeParams.append("customer_email", user.email);
-    stripeParams.append("client_reference_id", user.id);
-    stripeParams.append("metadata[user_id]", user.id);
+    // Stripe creates a new customer for this Checkout.
+    stripeParams.append(
+      "customer_email",
+      user.email
+    );
+
+    // Associate Checkout with the Supabase user.
+    stripeParams.append(
+      "client_reference_id",
+      user.id
+    );
+
+    stripeParams.append(
+      "metadata[user_id]",
+      user.id
+    );
+
+    // Also attach the user ID to the subscription.
     stripeParams.append(
       "subscription_data[metadata][user_id]",
       user.id
@@ -134,11 +158,20 @@ export default async function handler(req, res) {
     const session = await stripeResponse.json();
 
     if (!stripeResponse.ok) {
-      console.error("Stripe error:", session);
+      console.error(
+        "Stripe Checkout error:",
+        session
+      );
 
       return res.status(400).json({
         error: "Unable to create checkout session."
       });
+    }
+
+    if (!session.url) {
+      throw new Error(
+        "Stripe did not return a Checkout URL."
+      );
     }
 
     return res.status(200).json({
@@ -146,7 +179,10 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error("Checkout error:", error);
+    console.error(
+      "Checkout error:",
+      error
+    );
 
     return res.status(500).json({
       error: "Something went wrong creating checkout."
