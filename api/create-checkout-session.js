@@ -12,7 +12,8 @@ export default async function handler(req, res) {
       STRIPE_PRICE_ID,
       SUPABASE_URL,
       SUPABASE_ANON_KEY,
-      SUPABASE_SERVICE_ROLE_KEY
+      SUPABASE_SERVICE_ROLE_KEY,
+      SITE_URL
     } = process.env;
 
     if (
@@ -20,7 +21,8 @@ export default async function handler(req, res) {
       !STRIPE_PRICE_ID ||
       !SUPABASE_URL ||
       !SUPABASE_ANON_KEY ||
-      !SUPABASE_SERVICE_ROLE_KEY
+      !SUPABASE_SERVICE_ROLE_KEY ||
+      !SITE_URL
     ) {
       return res.status(500).json({
         error: "Missing server environment variables."
@@ -63,7 +65,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check the user's existing subscription.
+    // Check existing subscription.
     const subscriptionResponse = await fetch(
       `${SUPABASE_URL}/rest/v1/user_subscriptions?select=status,stripe_subscription_id&user_id=eq.${encodeURIComponent(user.id)}`,
       {
@@ -76,15 +78,12 @@ export default async function handler(req, res) {
     );
 
     if (!subscriptionResponse.ok) {
-      throw new Error(
-        "Unable to verify subscription status."
-      );
+      throw new Error("Unable to verify subscription status.");
     }
 
     const rows = await subscriptionResponse.json();
     const subscription = rows[0];
 
-    // Prevent duplicate active subscriptions.
     if (
       subscription &&
       ["active", "trialing"].includes(subscription.status)
@@ -94,54 +93,27 @@ export default async function handler(req, res) {
       });
     }
 
-    // Create a new Stripe Checkout session.
-    // Do not reuse old Sandbox customer IDs.
+    // Create Stripe Checkout session.
     const stripeParams = new URLSearchParams();
 
     stripeParams.append("mode", "subscription");
-
-    stripeParams.append(
-      "line_items[0][price]",
-      STRIPE_PRICE_ID
-    );
-
-    stripeParams.append(
-      "line_items[0][quantity]",
-      "1"
-    );
+    stripeParams.append("line_items[0][price]", STRIPE_PRICE_ID);
+    stripeParams.append("line_items[0][quantity]", "1");
 
     stripeParams.append(
       "success_url",
-      "https://masterballer.vercel.app/dashboard.html?checkout=success"
+      `${SITE_URL}/dashboard.html?checkout=success`
     );
 
     stripeParams.append(
       "cancel_url",
-      "https://masterballer.vercel.app/results.html"
+      `${SITE_URL}/results.html`
     );
 
-    // Stripe creates a new customer for this Checkout.
-    stripeParams.append(
-      "customer_email",
-      user.email
-    );
-
-    // Associate Checkout with the Supabase user.
-    stripeParams.append(
-      "client_reference_id",
-      user.id
-    );
-
-    stripeParams.append(
-      "metadata[user_id]",
-      user.id
-    );
-
-    // Also attach the user ID to the subscription.
-    stripeParams.append(
-      "subscription_data[metadata][user_id]",
-      user.id
-    );
+    stripeParams.append("customer_email", user.email);
+    stripeParams.append("client_reference_id", user.id);
+    stripeParams.append("metadata[user_id]", user.id);
+    stripeParams.append("subscription_data[metadata][user_id]", user.id);
 
     const stripeResponse = await fetch(
       "https://api.stripe.com/v1/checkout/sessions",
@@ -158,10 +130,7 @@ export default async function handler(req, res) {
     const session = await stripeResponse.json();
 
     if (!stripeResponse.ok) {
-      console.error(
-        "Stripe Checkout error:",
-        session
-      );
+      console.error("Stripe Checkout error:", session);
 
       return res.status(400).json({
         error: "Unable to create checkout session."
@@ -169,9 +138,7 @@ export default async function handler(req, res) {
     }
 
     if (!session.url) {
-      throw new Error(
-        "Stripe did not return a Checkout URL."
-      );
+      throw new Error("Stripe did not return a Checkout URL.");
     }
 
     return res.status(200).json({
@@ -179,10 +146,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error(
-      "Checkout error:",
-      error
-    );
+    console.error("Checkout error:", error);
 
     return res.status(500).json({
       error: "Something went wrong creating checkout."
