@@ -53,7 +53,9 @@ async function checkSubscription(session) {
   try {
     result = await response.json();
   } catch {
-    throw new Error("Unable to verify your subscription. Please try again.");
+    throw new Error(
+      "Unable to verify your subscription. Please try again."
+    );
   }
 
   if (!response.ok) {
@@ -71,7 +73,9 @@ async function checkSubscription(session) {
 
 async function redirectToCheckout(session) {
   if (!session?.access_token) {
-    throw new Error("Please log in before continuing to payment.");
+    throw new Error(
+      "Please log in before continuing to payment."
+    );
   }
 
   const response = await fetch("/api/create-checkout-session", {
@@ -88,24 +92,45 @@ async function redirectToCheckout(session) {
   try {
     result = await response.json();
   } catch {
-    throw new Error("Unable to start checkout. Please try again.");
+    throw new Error(
+      "Unable to start checkout. Please try again."
+    );
   }
 
+  // Existing subscribers go directly to their dashboard.
+  if (result.alreadySubscribed) {
+    window.location.replace("dashboard.html");
+    return;
+  }
+
+  // Existing subscriptions with payment problems.
+  if (result.subscriptionNeedsAttention) {
+    throw new Error(
+      result.error ||
+      "Your existing subscription needs attention. Please resolve your payment issue."
+    );
+  }
+
+  // Subscription records that need manual verification.
+  if (result.subscriptionNeedsVerification) {
+    throw new Error(
+      result.error ||
+      "We need to verify your existing subscription before continuing. Please contact support."
+    );
+  }
+
+  // Handle other server errors.
   if (!response.ok) {
     throw new Error(
       result.error || "Unable to start checkout."
     );
   }
 
-  if (result.alreadySubscribed) {
-    window.location.replace("dashboard.html");
-    return;
-  }
-
   if (!result.url) {
     throw new Error("Checkout URL was not returned.");
   }
 
+  // Redirect to Stripe's secure Checkout page.
   window.location.assign(result.url);
 }
 
@@ -140,10 +165,13 @@ if (loginForm) {
       if (error) throw error;
 
       if (!data.session) {
-        throw new Error("Login succeeded, but no session was returned.");
+        throw new Error(
+          "Login succeeded, but no session was returned."
+        );
       }
 
-      message.textContent = "Login successful. Checking subscription...";
+      message.textContent =
+        "Login successful. Checking subscription...";
 
       const subscribed = await checkSubscription(data.session);
 
@@ -173,7 +201,8 @@ if (signupForm) {
     signupForm.querySelector("#date-of-birth");
 
   if (dateOfBirthInput) {
-    dateOfBirthInput.max = new Date().toISOString().split("T")[0];
+    dateOfBirthInput.max =
+      new Date().toISOString().split("T")[0];
   }
 
   signupForm.addEventListener("submit", async (event) => {
@@ -198,7 +227,8 @@ if (signupForm) {
     const age = calculateAge(dateOfBirthInput.value);
 
     if (age < 0) {
-      message.textContent = "Please enter a valid date of birth.";
+      message.textContent =
+        "Please enter a valid date of birth.";
       return;
     }
 
@@ -228,13 +258,13 @@ if (signupForm) {
 
       if (data.session) {
         message.textContent =
-          "Account created! Checking your account...";
+          "Account created! Opening your payment page...";
 
         window.location.replace("payment.html");
+
       } else {
         message.textContent =
-          message.textContent =
-  "Account created! Please verify your email. Check your inbox and spam folder for the verification email. After verification, log in to continue.";
+          "Account created! Please verify your email. Check your inbox and spam folder. After verification, log in to continue.";
 
         button.disabled = false;
       }
@@ -271,7 +301,7 @@ if (paymentPage) {
         return;
       }
 
-      // Active subscribers should never be charged again.
+      // Check whether the user already has access.
       const subscribed = await checkSubscription(data.session);
 
       if (subscribed) {
@@ -282,7 +312,8 @@ if (paymentPage) {
         return;
       }
 
-      // Only users without an active subscription reach Checkout.
+      // Backend performs a second subscription check
+      // before creating a Stripe Checkout session.
       message.textContent = "Opening secure checkout...";
 
       await redirectToCheckout(data.session);
